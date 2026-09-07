@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garcos Pro - Secure Sign In / Sign Up</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background-color: #f0fdf4;
+            color: #064e3b;
+        }
+    </style>
+</head>
+
+<body class="selection:bg-emerald-600 selection:text-white flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white border border-emerald-300 p-8 rounded-2xl w-full max-w-md shadow-xl space-y-6">
+        <div class="text-center">
+            <div
+                class="bg-emerald-100 text-emerald-700 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 border border-emerald-300 shadow-sm">
+                <i class="fa-solid fa-calculator text-xl"></i>
+            </div>
+            <h1 class="text-xl font-black text-emerald-950">Garcos Enterprise Pro</h1>
+            <p class="text-xs text-emerald-900/70 mt-1 font-medium">Sign in or create account with your Gmail address
+            </p>
+        </div>
+
+        <!-- Step 1: Email Input (Sign Up / Sign In) -->
+        <div id="step-email" class="space-y-4">
+            <div>
+                <label class="text-[10px] font-extrabold text-emerald-900 uppercase block mb-1">Gmail Address</label>
+                <input type="email" id="user-email" placeholder="name@gmail.com"
+                    class="w-full bg-emerald-50/50 border border-emerald-300 rounded-lg px-3 py-2 text-sm text-emerald-950 focus:outline-none focus:border-emerald-600 font-semibold">
+            </div>
+            <button onclick="sendOTP()"
+                class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-all shadow-md shadow-emerald-600/20">
+                Continue with Gmail OTP
+            </button>
+            <div class="text-center">
+                <a href="/landing.html" class="text-[11px] font-bold text-emerald-700 hover:underline">← Back to Pricing
+                    & Home</a>
+            </div>
+        </div>
+
+        <!-- Step 2: OTP Verification -->
+        <div id="step-otp" class="hidden space-y-4">
+            <div>
+                <label class="text-[10px] font-extrabold text-emerald-900 uppercase block mb-1">Enter 6-Digit OTP Sent
+                    to Email</label>
+                <input type="text" id="otp-code" maxlength="6" placeholder="123456"
+                    class="w-full bg-emerald-50/50 border border-emerald-300 rounded-lg px-3 py-2 text-center text-lg text-emerald-950 tracking-widest font-black focus:outline-none focus:border-emerald-600">
+            </div>
+            <button onclick="verifyOTP()"
+                class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-all shadow-md shadow-emerald-600/20">
+                Verify & Access Software
+            </button>
+            <div class="text-center">
+                <button onclick="resetToEmailStep()"
+                    class="text-[11px] font-bold text-emerald-700 hover:underline">Change Email Address</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Subscription Plan Selector (Shown if Trial Expired) -->
+        <div id="step-subscription" class="hidden space-y-4">
+            <div class="p-3 bg-amber-50 border border-amber-300 rounded-xl text-center">
+                <span class="text-xs font-black text-amber-900 block mb-0.5">Free Trial Period Completed</span>
+                <span class="text-[11px] text-amber-800 font-medium">Please select a subscription plan to continue
+                    utilizing Garcos Pro.</span>
+            </div>
+
+            <div class="space-y-2">
+                <button onclick="initRazorpayPayment('basic')"
+                    class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
+                    <div>
+                        <div class="text-xs font-black text-emerald-950">Basic Plan (Single Garment)</div>
+                        <div class="text-[10px] text-emerald-800/80">Calculations access</div>
+                    </div>
+                    <span class="text-xs font-black text-emerald-700">₹369 / mo</span>
+                </button>
+
+                <button onclick="initRazorpayPayment('pro_monthly')"
+                    class="w-full p-3 bg-emerald-600 text-white rounded-xl flex items-center justify-between text-left shadow-md transition-all">
+                    <div>
+                        <div class="text-xs font-black">Pro Monthly Plan</div>
+                        <div class="text-[10px] text-emerald-100">Full suite access</div>
+                    </div>
+                    <span class="text-xs font-black">₹399 / mo</span>
+                </button>
+
+                <button onclick="initRazorpayPayment('pro_quarterly')"
+                    class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
+                    <div>
+                        <div class="text-xs font-black text-emerald-950">Quarterly Pro Plan</div>
+                        <div class="text-[10px] text-emerald-800/80">3 Months continuous plan</div>
+                    </div>
+                    <span class="text-xs font-black text-emerald-700">₹2,299 / 3mo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resetToEmailStep() {
+            document.getElementById('step-otp').classList.add('hidden');
+            document.getElementById('step-email').classList.remove('hidden');
+        }
+
+        async function sendOTP() {
+                const emailInput = document.getElementById('user-email');
+                const email = emailInput ? emailInput.value.trim() : '';
+
+                if (!email || !email.includes('@') || !email.includes('.')) {
+                    alert('Please enter a valid email address.');
+                    if (emailInput) emailInput.focus();
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/.netlify/functions/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        document.getElementById('step-email').classList.add('hidden');
+                        document.getElementById('step-otp').classList.remove('hidden');
+                        alert('OTP sent successfully to your inbox.');
+                    } else {
+                        alert(data.error || 'Failed to send OTP.');
+                    }
+                } catch (err) {
+                    alert('Network error while connecting to authentication server.');
+                }
+            }
+
+        async function verifyOTP() {
+            const email = document.getElementById('user-email').value;
+            const otp = document.getElementById('otp-code').value;
+
+            try {
+                const res = await fetch('/.netlify/functions/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.token) {
+                    localStorage.setItem('garcos_auth_token', data.token);
+
+                    if (data.isPaid || data.isTrialActive) {
+                        window.location.href = '/index.html';
+                    } else {
+                        // Trial expired, prompt subscription selection
+                        document.getElementById('step-otp').classList.add('hidden');
+                        document.getElementById('step-subscription').classList.remove('hidden');
+                    }
+                } else {
+                    alert(data.error || 'Invalid OTP code.');
+                }
+            } catch (err) {
+                alert('Verification failed due to a server error.');
+            }
+        }
+
+        function initRazorpayPayment(planType) {
+            const email = document.getElementById('user-email').value;
+
+            fetch('/.netlify/functions/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, planType })
+            })
+                .then(res => res.json())
+                .then(order => {
+                    const options = {
+                        key: "rzp_live_TZ7bnKHOZNNY1m", // Replace with your live/test Razorpay Key ID
+                        amount: order.amount,
+                        currency: "INR",
+                        name: "Garcos Enterprise Pro",
+                        description: "Subscription License",
+                        order_id: order.id,
+                        handler: function (response) {
+                            alert('Payment Successful! Welcome to Garcos Pro.');
+                            window.location.href = '/index.html';
+                        },
+                        prefill: { email: email },
+                        theme: { color: "#059669" }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                })
+                .catch(err => {
+                    alert('Could not initialize payment gateway.');
+                });
+        }
+    </script>
+</body>
+
+</html>
