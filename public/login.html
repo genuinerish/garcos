@@ -247,40 +247,45 @@
         }
 
         async function initRazorpayPayment(planType) {
-            try {
-                const orderRes = await fetch('/.netlify/functions/create-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail, planType: planType })
-                });
-                const order = await orderRes.json();
-
-                if (!orderRes.ok) {
-                    showStatus(order.error || 'Could not create payment order.', 'error');
+                if (!userEmail) {
+                    showStatus('Please enter your email address first.', 'error');
                     return;
                 }
 
-                const options = {
-                    key: order.keyId,
-                    amount: order.amount,
-                    currency: "INR",
-                    name: "Fashmar Enterprise Pro",
-                    description: "Subscription License",
-                    order_id: order.id,
-                    handler: function (response) {
-                        showStatus('Payment Successful! Unlocking app...', 'success');
-                        setTimeout(() => { window.location.href = '/app.html'; }, 1000);
-                    },
-                    prefill: { name: userName, email: userEmail },
-                    theme: { color: "#059669" }
-                };
+                try {
+                    const orderRes = await fetch('/.netlify/functions/create-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmail, planType: planType })
+                    });
+                    const order = await orderRes.json();
 
-                const rzp = new Razorpay(options);
-                rzp.open();
-            } catch (err) {
-                showStatus('Could not initialize payment gateway.', 'error');
+                    if (!orderRes.ok) {
+                        showStatus(order.error || 'Could not create payment order.', 'error');
+                        return;
+                    }
+
+                    const options = {
+                        key: order.keyId,
+                        amount: order.amount,
+                        currency: "INR",
+                        name: "Garcos Enterprise Pro",
+                        description: "Subscription License",
+                        order_id: order.id,
+                        handler: function (response) {
+                            showStatus('Payment Successful! Unlocking app...', 'success');
+                            setTimeout(() => { window.location.href = '/app.html'; }, 1000);
+                        },
+                        prefill: { name: userName || 'Garcos User', email: userEmail },
+                        theme: { color: "#059669" }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                } catch (err) {
+                    showStatus('Could not initialize payment gateway.', 'error');
+                }
             }
-        }
     </script>
 </body>
 
