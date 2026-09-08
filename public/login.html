@@ -78,34 +78,34 @@
                     utilizing Garcos Pro.</span>
             </div>
 
-            <div class="space-y-2">
-                <button onclick="initRazorpayPayment('basic')"
-                    class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
-                    <div>
-                        <div class="text-xs font-black text-emerald-950">Basic Plan (Single Garment)</div>
-                        <div class="text-[10px] text-emerald-800/80">Calculations access</div>
-                    </div>
-                    <span class="text-xs font-black text-emerald-700">₹369 / mo</span>
-                </button>
-
-                <button onclick="initRazorpayPayment('pro_monthly')"
-                    class="w-full p-3 bg-emerald-600 text-white rounded-xl flex items-center justify-between text-left shadow-md transition-all">
-                    <div>
-                        <div class="text-xs font-black">Pro Monthly Plan</div>
-                        <div class="text-[10px] text-emerald-100">Full suite access</div>
-                    </div>
-                    <span class="text-xs font-black">₹399 / mo</span>
-                </button>
-
-                <button onclick="initRazorpayPayment('pro_quarterly')"
-                    class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
-                    <div>
-                        <div class="text-xs font-black text-emerald-950">Quarterly Pro Plan</div>
-                        <div class="text-[10px] text-emerald-800/80">3 Months continuous plan</div>
-                    </div>
-                    <span class="text-xs font-black text-emerald-700">₹2,299 / 3mo</span>
-                </button>
-            </div>
+        <div class="space-y-2">
+            <button onclick="initRazorpayPayment('basic')"
+                class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
+                <div>
+                    <div class="text-xs font-black text-emerald-950">Basic Plan (Single Garment)</div>
+                    <div class="text-[10px] text-emerald-800/80">Calculations access</div>
+                </div>
+                <span class="text-xs font-black text-emerald-700">₹399 / mo</span>
+            </button>
+        
+            <button onclick="initRazorpayPayment('premium')"
+                class="w-full p-3 bg-emerald-600 text-white rounded-xl flex items-center justify-between text-left shadow-md transition-all">
+                <div>
+                    <div class="text-xs font-black">Premium Monthly Plan</div>
+                    <div class="text-[10px] text-emerald-100">Full suite access</div>
+                </div>
+                <span class="text-xs font-black">₹459 / mo</span>
+            </button>
+        
+            <button onclick="initRazorpayPayment('pro_quarterly')"
+                class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
+                <div>
+                    <div class="text-xs font-black text-emerald-950">3 Months Quarterly Plan</div>
+                    <div class="text-[10px] text-emerald-800/80">Continuous multi-month access</div>
+                </div>
+                <span class="text-xs font-black text-emerald-700">₹1,299 / 3mo</span>
+            </button>
+        </div>
         </div>
     </div>
 
@@ -207,6 +207,7 @@
                 });
         }
     </script>
+    
 </body>
 
 </html>

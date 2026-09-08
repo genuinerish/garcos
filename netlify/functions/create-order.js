@@ -14,17 +14,16 @@ exports.handler = async (event) => {
         const { email, planType } = JSON.parse(event.body);
 
         // Map subscription plans to correct amounts in paise (₹1 = 100 paise)
-        let amountInPaise = 39900; // Default to Pro Monthly (₹399)
-        let planName = 'Pro Monthly Plan';
+        let amountInPaise = 45900; // Default to Premium Monthly (₹459)
+        let planName = 'Premium Monthly Plan';
 
         if (planType === 'basic') {
-            amountInPaise = 36900; // ₹369.00
+            amountInPaise = 39900; // ₹399.00
             planName = 'Basic Plan';
         } else if (planType === 'pro_quarterly') {
-            amountInPaise = 229900; // ₹2,299.00
-            planName = 'Quarterly Pro Plan';
+            amountInPaise = 129900; // ₹1,299.00
+            planName = '3 Months Quarterly Plan';
         }
-
         const options = {
             amount: amountInPaise,
             currency: "INR",
