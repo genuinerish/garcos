@@ -16,6 +16,12 @@
             background-color: #f0fdf4;
             color: #064e3b;
         }
+
+        .otp-input::-webkit-outer-spin-button,
+        .otp-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -33,10 +39,10 @@
             <p class="text-xs text-emerald-800/80 font-medium">Professional Garment Costing Suite Authentication</p>
         </div>
 
-        <!-- Inline Status Banner (Replaces ugly browser alerts) -->
+        <!-- Status Banner -->
         <div id="status-banner" class="hidden p-3 rounded-xl text-xs font-bold text-center transition-all"></div>
 
-        <!-- Unified Form Container -->
+        <!-- Auth Form -->
         <div id="auth-form-container" class="space-y-4">
             <div>
                 <label class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 mb-1">Full
@@ -52,11 +58,31 @@
                     class="w-full px-4 py-3 bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 placeholder-emerald-800/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
             </div>
 
-            <div id="otp-group" class="hidden space-y-1">
-                <label class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 mb-1">Enter
-                    6-Digit OTP</label>
-                <input type="text" id="otp-code" maxlength="6" placeholder="123456"
-                    class="w-full px-4 py-3 bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 placeholder-emerald-800/40 text-center tracking-widest text-lg font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
+            <!-- 6-Box Individual OTP Section -->
+            <div id="otp-group" class="hidden space-y-2">
+                <label
+                    class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 text-center mb-1">Enter
+                    6-Digit Verification Code</label>
+                <div class="flex justify-between gap-2">
+                    <input type="text" maxlength="1"
+                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                        oninput="handleOtpInput(this, 0)" onkeydown="handleOtpKeyDown(event, 0)">
+                    <input type="text" maxlength="1"
+                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                        oninput="handleOtpInput(this, 1)" onkeydown="handleOtpKeyDown(event, 1)">
+                    <input type="text" maxlength="1"
+                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                        oninput="handleOtpInput(this, 2)" onkeydown="handleOtpKeyDown(event, 2)">
+                    <input type="text" maxlength="1"
+                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                        oninput="handleOtpInput(this, 3)" onkeydown="handleOtpKeyDown(event, 3)">
+                    <input type="text" maxlength="1"
+                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                        oninput="handleOtpInput(this, 4)" onkeydown="handleOtpKeyDown(event, 4)">
+                    <input type="text" maxlength="1"
+                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
+                        oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeyDown(event, 5)">
+                </div>
             </div>
 
             <button onclick="handleAuthAction()" id="action-btn"
@@ -65,9 +91,9 @@
             </button>
         </div>
 
-        <!-- Subscription Plans Section (Hidden until trial expires) -->
+        <!-- Subscription Plans Section -->
         <div id="subscription-section" class="space-y-3 hidden border-t border-emerald-100 pt-4">
-            <p class="text-xs font-bold text-emerald-900 text-center">Your 25-Day Free Trial Has Ended. Select Plan:</p>
+            <p class="text-xs font-bold text-emerald-900 text-center">Your Trial Has Ended. Select a Plan:</p>
 
             <button onclick="initRazorpayPayment('basic')"
                 class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
@@ -97,7 +123,7 @@
             </button>
         </div>
 
-        <!-- Back to Home link -->
+        <!-- Back to Home -->
         <div class="text-center pt-2">
             <a href="/index.html"
                 class="text-xs text-emerald-800 hover:text-emerald-950 font-bold transition-all flex items-center justify-center gap-1.5">
@@ -125,6 +151,26 @@
             banner.innerText = message;
         }
 
+        // 6-box auto-advance logic
+        function handleOtpInput(element, index) {
+            const value = element.value;
+            if (value && index < 5) {
+                document.querySelectorAll('.otp-input')[index + 1].focus();
+            }
+        }
+
+        function handleOtpKeyDown(event, index) {
+            if (event.key === 'Backspace' && !event.target.value && index > 0) {
+                document.querySelectorAll('.otp-input')[index - 1].focus();
+            }
+        }
+
+        function getCompleteOtp() {
+            let otp = '';
+            document.querySelectorAll('.otp-input').forEach(input => otp += input.value);
+            return otp;
+        }
+
         async function handleAuthAction() {
             userName = document.getElementById('user-name').value.trim();
             userEmail = document.getElementById('user-email').value.trim();
@@ -137,7 +183,7 @@
             if (!isOtpStep) {
                 const btn = document.getElementById('action-btn');
                 btn.disabled = true;
-                showStatus('Sending verification OTP to your inbox...', 'info');
+                showStatus('Sending verification code to your inbox...', 'info');
 
                 try {
                     const res = await fetch('/.netlify/functions/send-otp', {
@@ -149,9 +195,12 @@
 
                     if (res.ok) {
                         isOtpStep = true;
+                        document.getElementById('user-name').disabled = true;
+                        document.getElementById('user-email').disabled = true;
                         document.getElementById('otp-group').classList.remove('hidden');
-                        document.getElementById('btn-text').innerText = 'Verify OTP & Sign In';
-                        showStatus('OTP sent successfully! Enter code below.', 'success');
+                        document.getElementById('btn-text').innerText = 'Verify & Access App';
+                        showStatus('Verification code sent! Check your email.', 'success');
+                        document.querySelectorAll('.otp-input')[0].focus();
                     } else {
                         showStatus(data.error || 'Failed to send OTP.', 'error');
                     }
@@ -161,9 +210,9 @@
                     btn.disabled = false;
                 }
             } else {
-                const otp = document.getElementById('otp-code').value.trim();
+                const otp = getCompleteOtp();
                 if (!otp || otp.length !== 6) {
-                    showStatus('Please enter a valid 6-digit OTP.', 'error');
+                    showStatus('Please enter all 6 digits of the verification code.', 'error');
                     return;
                 }
 
@@ -181,7 +230,7 @@
 
                     if (res.ok) {
                         if (data.hasActiveAccess) {
-                            showStatus('Access granted! Redirecting to app...', 'success');
+                            showStatus('Access granted! Redirecting to dashboard...', 'success');
                             setTimeout(() => { window.location.href = '/app.html'; }, 800);
                         } else {
                             document.getElementById('auth-form-container').classList.add('hidden');
@@ -189,7 +238,7 @@
                             showStatus('Your 25-day trial period has ended. Please choose a plan.', 'error');
                         }
                     } else {
-                        showStatus(data.error || 'Invalid OTP.', 'error');
+                        showStatus(data.error || 'Invalid OTP code.', 'error');
                     }
                 } catch (err) {
                     showStatus('Connection error during verification.', 'error');
@@ -221,7 +270,7 @@
                     description: "Subscription License",
                     order_id: order.id,
                     handler: function (response) {
-                        showStatus('Payment Successful! Redirecting...', 'success');
+                        showStatus('Payment Successful! Unlocking app...', 'success');
                         setTimeout(() => { window.location.href = '/app.html'; }, 1000);
                     },
                     prefill: { name: userName, email: userEmail },

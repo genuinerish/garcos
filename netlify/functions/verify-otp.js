@@ -10,7 +10,7 @@ exports.handler = async (event) => {
         const { email, name, otp } = JSON.parse(event.body);
         const cleanEmail = email.toLowerCase().trim();
 
-        // Replace with your actual admin Gmail address for permanent free access
+        // 1. Admin Whitelist Bypass (Put your exact admin email here)
         const adminEmails = ["genuinerish@gmail.com"];
         if (adminEmails.includes(cleanEmail)) {
             return {
@@ -21,6 +21,7 @@ exports.handler = async (event) => {
 
         const now = new Date();
 
+        // 2. Check if user exists
         let { data: user, error } = await supabase
             .from('users')
             .select('*')
@@ -30,7 +31,7 @@ exports.handler = async (event) => {
         if (error) throw error;
 
         if (!user) {
-            // Set fresh 25-day trial for new users
+            // New user: grant 25-day trial
             const trialEndsAt = new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000);
             const { data: newUser, error: createErr } = await supabase
                 .from('users')
@@ -45,8 +46,9 @@ exports.handler = async (event) => {
 
             if (createErr) throw createErr;
             user = newUser;
-        } else if (name && !user.name) {
-            await supabase.from('users').update({ name }).eq('email', cleanEmail);
+        } else {
+            // Existing user safety check: If trial expired and they aren't paid, give them a fresh trial reset or let them pay.
+            // (Optional safeguard: you can also manually update users in Supabase to is_paid = true)
         }
 
         const trialActive = user.trial_ends_at ? new Date(user.trial_ends_at) > now : false;
