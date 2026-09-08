@@ -13,20 +13,25 @@ exports.handler = async (event) => {
     try {
         const { email, planType } = JSON.parse(event.body);
 
-        // Plan-specific pricing mapping (amounts in INR paisa: ₹1 = 100 paisa)
-        const planPricing = {
-            basic: { amount: 39900, name: 'Basic Plan - Monthly' },
-            premium: { amount: 45900, name: 'Premium Monthly Plan' },
-            pro_quarterly: { amount: 129900, name: '3 Months Quarterly Plan' }
+        // Individual plan mapping with unique attributes and amounts (in paisa)
+        const planMapping = {
+            basic: { amount: 39900, name: 'Garcos Basic Plan', reference: 'plan_basic_monthly' },
+            premium: { amount: 45900, name: 'Garcos Premium Plan', reference: 'plan_premium_monthly' },
+            pro_quarterly: { amount: 129900, name: 'Garcos Quarterly Plan', reference: 'plan_pro_quarterly' }
         };
 
-        const selectedPlan = planPricing[planType] || planPricing.premium;
+        const selectedPlan = planMapping[planType] || planMapping.premium;
 
         const options = {
             amount: selectedPlan.amount,
             currency: "INR",
-            receipt: `receipt_${Date.now()}_${email.substring(0, 5)}`,
-            notes: { email: email, plan: planType }
+            receipt: `rcpt_${Date.now()}_${planType}`,
+            notes: {
+                email: email,
+                planType: planType,
+                planName: selectedPlan.name,
+                planReference: selectedPlan.reference
+            }
         };
 
         const order = await razorpay.orders.create(options);
