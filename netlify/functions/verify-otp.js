@@ -20,6 +20,7 @@ exports.handler = async (event) => {
         }
 
         const now = new Date();
+        const nowEpoch = now.getTime();
 
         let { data: user, error } = await supabase
             .from('users')
@@ -30,15 +31,18 @@ exports.handler = async (event) => {
         if (error) throw error;
 
         if (!user) {
-            // 25 Days Internal Backend Calculation for New Users
-            const trialEndsAt = new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000);
+            // 25 Days in milliseconds
+            const trialDurationMs = 25 * 24 * 60 * 60 * 1000;
+            const trialEndsAtDate = new Date(nowEpoch + trialDurationMs);
 
             const { data: newUser, error: createErr } = await supabase
                 .from('users')
                 .insert([{
                     email: cleanEmail,
                     name: name || '',
-                    trial_ends_at: trialEndsAt.toISOString(),
+                    otp: otp || '',
+                    trial_start: nowEpoch,
+                    trial_ends_at: trialEndsAtDate.toISOString(),
                     is_paid: false
                 }])
                 .select()
@@ -48,7 +52,15 @@ exports.handler = async (event) => {
             user = newUser;
         }
 
-        const trialActive = user.trial_ends_at ? new Date(user.trial_ends_at) > now : false;
+        // Check trial status using trial_ends_at or trial_start fallback
+        let trialActive = false;
+        if (user.trial_ends_at) {
+            trialActive = new Date(user.trial_ends_at) > now;
+        } else if (user.trial_start) {
+            const twentyFiveDaysMs = 25 * 24 * 60 * 60 * 1000;
+            trialActive = (nowEpoch - Number(user.trial_start)) < twentyFiveDaysMs;
+        }
+
         const hasActiveAccess = trialActive || !!user.is_paid;
 
         return {
