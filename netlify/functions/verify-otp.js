@@ -8,30 +8,32 @@ exports.handler = async (event) => {
 
     try {
         const { email, otp } = JSON.parse(event.body);
+        const cleanEmail = email.toLowerCase().trim();
 
-        // Hardcode your admin email here for permanent free access
-        const adminEmails = ["genuinerish@gmail.com"]; // Replace with your actual admin Gmail
-        if (adminEmails.includes(email.toLowerCase())) {
+        // 1. Admin bypass check (Replace with your actual Gmail address)
+        const adminEmails = ["genuinerish@gmail.com@gmail.com"];
+        if (adminEmails.includes(cleanEmail)) {
             return {
                 statusCode: 200,
                 body: JSON.stringify({ success: true, hasActiveAccess: true, trialActive: true })
             };
         }
 
-        // Standard user verification logic below...
+        const now = new Date();
+
+        // 2. Check if user already exists
         let { data: user, error } = await supabase
             .from('users')
             .select('*')
-            .eq('email', email)
+            .eq('email', cleanEmail)
             .single();
 
-        const now = new Date();
-
         if (!user) {
+            // Brand new user: insert with a fresh 25-day trial starting now
             const trialEndsAt = new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000);
             const { data: newUser, createErr } = await supabase
                 .from('users')
-                .insert([{ email: email, trial_ends_at: trialEndsAt.toISOString(), is_paid: false }])
+                .insert([{ email: cleanEmail, trial_ends_at: trialEndsAt.toISOString(), is_paid: false }])
                 .select()
                 .single();
 
@@ -39,6 +41,7 @@ exports.handler = async (event) => {
             user = newUser;
         }
 
+        // 3. Evaluate access: Check if trial is still active or user has paid
         const trialActive = new Date(user.trial_ends_at) > now;
         const hasActiveAccess = trialActive || user.is_paid;
 
