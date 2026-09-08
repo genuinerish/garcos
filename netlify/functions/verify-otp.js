@@ -10,7 +10,7 @@ exports.handler = async (event) => {
         const { email, name, otp } = JSON.parse(event.body);
         const cleanEmail = email.toLowerCase().trim();
 
-        // 1. Admin Whitelist Bypass for your main email
+        // 1. Admin Whitelist Bypass
         const adminEmails = ["genuinerish@gmail.com"];
         if (adminEmails.includes(cleanEmail)) {
             return {
@@ -21,7 +21,6 @@ exports.handler = async (event) => {
 
         const now = new Date();
 
-        // 2. Check if user already exists in Supabase
         let { data: user, error } = await supabase
             .from('users')
             .select('*')
@@ -30,9 +29,8 @@ exports.handler = async (event) => {
 
         if (error) throw error;
 
-        // === PASTE / PLACE THIS BLOCK HERE ===
         if (!user) {
-            // Automatically calculate 25 days from right now
+            // 25 Days Internal Backend Calculation for New Users
             const trialEndsAt = new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000);
 
             const { data: newUser, error: createErr } = await supabase
@@ -40,7 +38,7 @@ exports.handler = async (event) => {
                 .insert([{
                     email: cleanEmail,
                     name: name || '',
-                    trial_ends_at: trialEndsAt.toISOString(), // Stored securely in database
+                    trial_ends_at: trialEndsAt.toISOString(),
                     is_paid: false
                 }])
                 .select()
@@ -50,10 +48,8 @@ exports.handler = async (event) => {
             user = newUser;
         }
 
-        // Backend checks every login to see if current time is still before trial_ends_at
         const trialActive = user.trial_ends_at ? new Date(user.trial_ends_at) > now : false;
         const hasActiveAccess = trialActive || !!user.is_paid;
-        // ======================================
 
         return {
             statusCode: 200,
