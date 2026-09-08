@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garcos Pro - Secure Sign In</title>
+    <title>Fashmar Pro - Secure Sign In</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -29,11 +29,10 @@
 
     <div class="w-full max-w-md bg-white border border-emerald-300 rounded-3xl p-8 shadow-xl space-y-6 relative">
 
-        <!-- Header -->
+        <!-- Header with Fashmar Logo Image -->
         <div class="text-center space-y-2">
-            <div
-                class="inline-flex bg-emerald-100 text-emerald-700 p-3 rounded-2xl border border-emerald-300 shadow-sm">
-                <i class="fa-solid fa-calculator text-2xl"></i>
+            <div class="flex justify-center mb-2">
+                <img src="https://imglink.cc/cdn/nHfc8Ym7TU.png" alt="Fashmar Logo" class="h-12 w-auto object-contain">
             </div>
             <h1 class="text-2xl font-black text-emerald-950 tracking-tight">Fashmar Enterprise Pro</h1>
             <p class="text-xs text-emerald-800/80 font-medium">Professional Garment Costing Suite Authentication</p>
@@ -151,7 +150,6 @@
             banner.innerText = message;
         }
 
-        // 6-box auto-advance logic
         function handleOtpInput(element, index) {
             const value = element.value;
             if (value && index < 5) {
@@ -266,7 +264,7 @@
                     key: order.keyId,
                     amount: order.amount,
                     currency: "INR",
-                    name: "Garcos Enterprise Pro",
+                    name: "Fashmar Enterprise Pro",
                     description: "Subscription License",
                     order_id: order.id,
                     handler: function (response) {
