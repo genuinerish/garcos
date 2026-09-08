@@ -10,7 +10,7 @@ exports.handler = async (event) => {
         const { email, otp } = JSON.parse(event.body);
 
         // Hardcode your admin email here for permanent free access
-        const adminEmails = ["your-admin-email@gmail.com"]; // Replace with your actual admin Gmail
+        const adminEmails = ["genuinerish@gmail.com"]; // Replace with your actual admin Gmail
         if (adminEmails.includes(email.toLowerCase())) {
             return {
                 statusCode: 200,
