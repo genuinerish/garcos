@@ -13,35 +13,29 @@ exports.handler = async (event) => {
     try {
         const { email, planType } = JSON.parse(event.body);
 
-        // Map subscription plans to correct amounts in paise (₹1 = 100 paise)
-        let amountInPaise = 45900; // Default to Premium Monthly (₹459)
-        let planName = 'Premium Monthly Plan';
+        // Determine amount based on plan
+        let amountInPaise = 45900; // Default Premium Monthly (₹459)
+        if (planType === 'basic') amountInPaise = 39900;     // ₹399
+        if (planType === 'pro_quarterly') amountInPaise = 129900; // ₹1,299
 
-        if (planType === 'basic') {
-            amountInPaise = 39900; // ₹399.00
-            planName = 'Basic Plan';
-        } else if (planType === 'pro_quarterly') {
-            amountInPaise = 129900; // ₹1,299.00
-            planName = '3 Months Quarterly Plan';
-        }
         const options = {
             amount: amountInPaise,
             currency: "INR",
-            receipt: "receipt_" + Date.now(),
-            notes: { userEmail: email, plan: planName }
+            receipt: `receipt_${Date.now()}`
         };
 
         const order = await razorpay.orders.create(options);
 
         return {
             statusCode: 200,
-            body: JSON.stringify(order)
+            body: JSON.stringify({
+                id: order.id,
+                amount: order.amount,
+                currency: order.currency,
+                keyId: process.env.RAZORPAY_KEY_ID // Send key safely to frontend
+            })
         };
-    } catch (error) {
-        console.error('Razorpay order creation error:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to create payment order.' })
-        };
+    } catch (err) {
+        return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
     }
 };

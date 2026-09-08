@@ -185,40 +185,40 @@
         }
 
         async function initRazorpayPayment(planType) {
-            try {
-                const orderRes = await fetch('/.netlify/functions/create-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail, planType: planType })
-                });
-                const order = await orderRes.json();
+                try {
+                    const orderRes = await fetch('/.netlify/functions/create-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmail, planType: planType })
+                    });
+                    const order = await orderRes.json();
 
-                if (!orderRes.ok) {
-                    alert(order.error || 'Could not create order.');
-                    return;
+                    if (!orderRes.ok) {
+                        alert(order.error || 'Could not create order.');
+                        return;
+                    }
+
+                    const options = {
+                        key: order.keyId, // Dynamically loaded safely from backend env vars
+                        amount: order.amount,
+                        currency: "INR",
+                        name: "Garcos Enterprise Pro",
+                        description: "Subscription License",
+                        order_id: order.id,
+                        handler: function (response) {
+                            alert('Payment Successful! Welcome to Garcos Pro.');
+                            window.location.href = '/app.html';
+                        },
+                        prefill: { email: userEmail },
+                        theme: { color: "#059669" }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                } catch (err) {
+                    alert('Could not initialize payment gateway.');
                 }
-
-                const options = {
-                    key: "rzp_live_TZ7bnKHOZNNY1m",
-                    amount: order.amount,
-                    currency: "INR",
-                    name: "Garcos Enterprise Pro",
-                    description: "Subscription License",
-                    order_id: order.id,
-                    handler: function (response) {
-                        alert('Payment Successful! Welcome to Garcos Pro.');
-                        window.location.href = '/app.html';
-                    },
-                    prefill: { email: userEmail },
-                    theme: { color: "#059669" }
-                };
-
-                const rzp = new Razorpay(options);
-                rzp.open();
-            } catch (err) {
-                alert('Could not initialize payment gateway.');
             }
-        }
     </script>
 
     <!-- FOOTER -->
