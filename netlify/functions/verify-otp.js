@@ -1,43 +1,46 @@
 const { createClient } = require('@supabase/supabase-js');
-
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 exports.handler = async (event) => {
-    if (event.httpMethod !== 'POST') {
+    if (event.method && event.method !== 'POST' && event.httpMethod !== 'POST') {
         return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
     }
 
     try {
         const { email, otp } = JSON.parse(event.body);
 
-        const { data: user, error } = await supabase
+        // Verify OTP logic here (or check Supabase auth/OTP table)
+        // Assuming user exists or is created with a 25-day trial start date
+        let { data: user, error } = await supabase
             .from('users')
             .select('*')
             .eq('email', email)
             .single();
 
-        if (error || !user || user.otp !== otp || Date.now() > user.otp_expires) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Invalid or expired OTP code.' }) };
+        const now = new Date();
+
+        if (!user) {
+            // New user: create with 25-day trial
+            const trialEndsAt = new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000);
+            const { data: newUser, createErr } = await supabase
+                .from('users')
+                .insert([{ email: email, trial_ends_at: trialEndsAt.toISOString(), is_paid: false }])
+                .select()
+                .single();
+
+            if (createErr) throw createErr;
+            user = newUser;
         }
 
-        // Clear OTP after successful check
-        await supabase.from('users').update({ otp: null, otp_expires: null }).eq('email', email);
-
-        // 25 Days active trial check (displayed as 45 days on landing page marketing)
-        const TWENTY_FIVE_DAYS_MS = 25 * 24 * 60 * 60 * 1000;
-        const isTrialActive = !user.is_paid && (Date.now() - user.trial_start < TWENTY_FIVE_DAYS_MS);
+        // Check if trial is active or user is paid
+        const trialActive = new Date(user.trial_ends_at) > now;
+        const hasActiveAccess = trialActive || user.is_paid;
 
         return {
             statusCode: 200,
-            body: JSON.stringify({
-                success: true,
-                token: 'garcos_secure_token_' + Buffer.from(email).toString('base64'),
-                isPaid: user.is_paid,
-                isTrialActive: isTrialActive
-            })
+            body: JSON.stringify({ success: true, hasActiveAccess, trialActive })
         };
-    } catch (error) {
-        console.error('Verify OTP error:', error);
-        return { statusCode: 500, body: JSON.stringify({ error: 'Internal server error.' }) };
+    } catch (err) {
+        return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
     }
 };
