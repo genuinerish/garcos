@@ -5,11 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garcos Pro - Secure Sign In</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
@@ -33,40 +30,44 @@
                 <i class="fa-solid fa-calculator text-2xl"></i>
             </div>
             <h1 class="text-2xl font-black text-emerald-950 tracking-tight">Garcos Enterprise Pro</h1>
-            <p class="text-xs text-emerald-800/80 font-medium">Sign in or create account with your Gmail address</p>
+            <p class="text-xs text-emerald-800/80 font-medium">Professional Garment Costing Suite Authentication</p>
         </div>
 
-        <!-- Step 1: Email & OTP Request Form -->
-        <div id="email-section" class="space-y-4">
+        <!-- Inline Status Banner (Replaces ugly browser alerts) -->
+        <div id="status-banner" class="hidden p-3 rounded-xl text-xs font-bold text-center transition-all"></div>
+
+        <!-- Unified Form Container -->
+        <div id="auth-form-container" class="space-y-4">
+            <div>
+                <label class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 mb-1">Full
+                    Name</label>
+                <input type="text" id="user-name" placeholder="Enter your full name"
+                    class="w-full px-4 py-3 bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 placeholder-emerald-800/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
+            </div>
+
             <div>
                 <label class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 mb-1">Gmail
                     Address</label>
                 <input type="email" id="user-email" placeholder="name@gmail.com"
                     class="w-full px-4 py-3 bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 placeholder-emerald-800/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
             </div>
-            <button onclick="sendOtp()" id="send-otp-btn"
-                class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
-                <span>Continue with Gmail OTP</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
-            </button>
-        </div>
 
-        <!-- Step 2: OTP Verification & Plan Selection (Hidden initially) -->
-        <div id="otp-section" class="space-y-4 hidden">
-            <div>
+            <div id="otp-group" class="hidden space-y-1">
                 <label class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 mb-1">Enter
                     6-Digit OTP</label>
                 <input type="text" id="otp-code" maxlength="6" placeholder="123456"
                     class="w-full px-4 py-3 bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 placeholder-emerald-800/40 text-center tracking-widest text-lg font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
             </div>
-            <button onclick="verifyOtp()" id="verify-otp-btn"
+
+            <button onclick="handleAuthAction()" id="action-btn"
                 class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
-                <span>Verify OTP & Sign In</span> <i class="fa-solid fa-check text-[10px]"></i>
+                <span id="btn-text">Send Verification OTP</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </button>
         </div>
 
-        <!-- Step 3: Subscription Tiers (Visible after login if trial expired or plan needed) -->
+        <!-- Subscription Plans Section (Hidden until trial expires) -->
         <div id="subscription-section" class="space-y-3 hidden border-t border-emerald-100 pt-4">
-            <p class="text-xs font-bold text-emerald-900 text-center">Select Your Subscription Plan</p>
+            <p class="text-xs font-bold text-emerald-900 text-center">Your 25-Day Free Trial Has Ended. Select Plan:</p>
 
             <button onclick="initRazorpayPayment('basic')"
                 class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
@@ -106,126 +107,134 @@
 
     </div>
 
-    <!-- JavaScript Handlers -->
     <script>
+        let isOtpStep = false;
+        let userName = "";
         let userEmail = "";
 
-        async function sendOtp() {
-            userEmail = document.getElementById('user-email').value.trim();
-            if (!userEmail) {
-                alert('Please enter your Gmail address.');
-                return;
+        function showStatus(message, type = 'info') {
+            const banner = document.getElementById('status-banner');
+            banner.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-red-100', 'text-red-800', 'bg-emerald-600', 'text-white');
+            if (type === 'error') {
+                banner.className = 'p-3 rounded-xl text-xs font-bold text-center bg-red-100 text-red-800 border border-red-300';
+            } else if (type === 'success') {
+                banner.className = 'p-3 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-800 border border-emerald-300';
+            } else {
+                banner.className = 'p-3 rounded-xl text-xs font-bold text-center bg-emerald-600 text-white';
             }
-
-            const btn = document.getElementById('send-otp-btn');
-            btn.innerText = 'Sending OTP...';
-            btn.disabled = true;
-
-            try {
-                const res = await fetch('/.netlify/functions/send-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail })
-                });
-                const data = await res.json();
-
-                if (res.ok) {
-                    document.getElementById('email-section').classList.add('hidden');
-                    document.getElementById('otp-section').classList.remove('hidden');
-                    alert('OTP sent to your email inbox!');
-                } else {
-                    alert(data.error || 'Failed to send OTP.');
-                }
-            } catch (err) {
-                alert('Connection error while sending OTP.');
-            } finally {
-                btn.innerText = 'Continue with Gmail OTP';
-                btn.disabled = false;
-            }
+            banner.innerText = message;
         }
 
-        async function verifyOtp() {
-            const otp = document.getElementById('otp-code').value.trim();
-            if (!otp || otp.length !== 6) {
-                alert('Please enter a valid 6-digit OTP.');
+        async function handleAuthAction() {
+            userName = document.getElementById('user-name').value.trim();
+            userEmail = document.getElementById('user-email').value.trim();
+
+            if (!userName || !userEmail) {
+                showStatus('Please enter both your full name and Gmail address.', 'error');
                 return;
             }
 
-            const btn = document.getElementById('verify-otp-btn');
-            btn.innerText = 'Verifying...';
-            btn.disabled = true;
+            if (!isOtpStep) {
+                const btn = document.getElementById('action-btn');
+                btn.disabled = true;
+                showStatus('Sending verification OTP to your inbox...', 'info');
 
-            try {
-                const res = await fetch('/.netlify/functions/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail, otp: otp })
-                });
-                const data = await res.json();
+                try {
+                    const res = await fetch('/.netlify/functions/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmail, name: userName })
+                    });
+                    const data = await res.json();
 
-                if (res.ok) {
-                    if (data.hasActiveAccess) {
-                        // Active trial or subscription exists -> Redirect straight to calculation dashboard
-                        window.location.href = '/app.html';
+                    if (res.ok) {
+                        isOtpStep = true;
+                        document.getElementById('otp-group').classList.remove('hidden');
+                        document.getElementById('btn-text').innerText = 'Verify OTP & Sign In';
+                        showStatus('OTP sent successfully! Enter code below.', 'success');
                     } else {
-                        // Trial expired -> Show subscription selection modal/tiers
-                        document.getElementById('otp-section').classList.add('hidden');
-                        document.getElementById('subscription-section').classList.remove('hidden');
-                        alert('Trial period ended. Please select a subscription plan to continue.');
+                        showStatus(data.error || 'Failed to send OTP.', 'error');
                     }
-                } else {
-                    alert(data.error || 'Invalid OTP.');
+                } catch (err) {
+                    showStatus('Connection error while sending OTP.', 'error');
+                } finally {
+                    btn.disabled = false;
                 }
-            } catch (err) {
-                alert('Connection error during verification.');
-            } finally {
-                btn.innerText = 'Verify OTP & Sign In';
-                btn.disabled = false;
+            } else {
+                const otp = document.getElementById('otp-code').value.trim();
+                if (!otp || otp.length !== 6) {
+                    showStatus('Please enter a valid 6-digit OTP.', 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('action-btn');
+                btn.disabled = true;
+                showStatus('Verifying credentials...', 'info');
+
+                try {
+                    const res = await fetch('/.netlify/functions/verify-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmail, name: userName, otp: otp })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        if (data.hasActiveAccess) {
+                            showStatus('Access granted! Redirecting to app...', 'success');
+                            setTimeout(() => { window.location.href = '/app.html'; }, 800);
+                        } else {
+                            document.getElementById('auth-form-container').classList.add('hidden');
+                            document.getElementById('subscription-section').classList.remove('hidden');
+                            showStatus('Your 25-day trial period has ended. Please choose a plan.', 'error');
+                        }
+                    } else {
+                        showStatus(data.error || 'Invalid OTP.', 'error');
+                    }
+                } catch (err) {
+                    showStatus('Connection error during verification.', 'error');
+                } finally {
+                    btn.disabled = false;
+                }
             }
         }
 
         async function initRazorpayPayment(planType) {
-                try {
-                    const orderRes = await fetch('/.netlify/functions/create-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: userEmail, planType: planType })
-                    });
-                    const order = await orderRes.json();
+            try {
+                const orderRes = await fetch('/.netlify/functions/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, planType: planType })
+                });
+                const order = await orderRes.json();
 
-                    if (!orderRes.ok) {
-                        alert(order.error || 'Could not create order.');
-                        return;
-                    }
-
-                    const options = {
-                        key: order.keyId, // Dynamically loaded safely from backend env vars
-                        amount: order.amount,
-                        currency: "INR",
-                        name: "Garcos Enterprise Pro",
-                        description: "Subscription License",
-                        order_id: order.id,
-                        handler: function (response) {
-                            alert('Payment Successful! Welcome to Garcos Pro.');
-                            window.location.href = '/app.html';
-                        },
-                        prefill: { email: userEmail },
-                        theme: { color: "#059669" }
-                    };
-
-                    const rzp = new Razorpay(options);
-                    rzp.open();
-                } catch (err) {
-                    alert('Could not initialize payment gateway.');
+                if (!orderRes.ok) {
+                    showStatus(order.error || 'Could not create payment order.', 'error');
+                    return;
                 }
+
+                const options = {
+                    key: order.keyId,
+                    amount: order.amount,
+                    currency: "INR",
+                    name: "Garcos Enterprise Pro",
+                    description: "Subscription License",
+                    order_id: order.id,
+                    handler: function (response) {
+                        showStatus('Payment Successful! Redirecting...', 'success');
+                        setTimeout(() => { window.location.href = '/app.html'; }, 1000);
+                    },
+                    prefill: { name: userName, email: userEmail },
+                    theme: { color: "#059669" }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (err) {
+                showStatus('Could not initialize payment gateway.', 'error');
             }
+        }
     </script>
-
-    <!-- FOOTER -->
-    <footer class="fixed bottom-2 text-center text-[10px] text-emerald-900/60 font-semibold w-full">
-        © 2026 Garcos Enterprise Pro · Conceptualized & Steered by Fashmer
-    </footer>
-
 </body>
 
 </html>

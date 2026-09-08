@@ -7,11 +7,11 @@ exports.handler = async (event) => {
     }
 
     try {
-        const { email, otp } = JSON.parse(event.body);
+        const { email, name, otp } = JSON.parse(event.body);
         const cleanEmail = email.toLowerCase().trim();
 
-        // 1. Admin bypass check (Replace with your actual Gmail address)
-        const adminEmails = ["genuinerish@gmail.com@gmail.com"];
+        // Replace with your actual admin Gmail address for permanent free access
+        const adminEmails = ["genuinerish@gmail.com"];
         if (adminEmails.includes(cleanEmail)) {
             return {
                 statusCode: 200,
@@ -21,29 +21,36 @@ exports.handler = async (event) => {
 
         const now = new Date();
 
-        // 2. Check if user already exists
         let { data: user, error } = await supabase
             .from('users')
             .select('*')
             .eq('email', cleanEmail)
-            .single();
+            .maybeSingle();
+
+        if (error) throw error;
 
         if (!user) {
-            // Brand new user: insert with a fresh 25-day trial starting now
+            // Set fresh 25-day trial for new users
             const trialEndsAt = new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000);
-            const { data: newUser, createErr } = await supabase
+            const { data: newUser, error: createErr } = await supabase
                 .from('users')
-                .insert([{ email: cleanEmail, trial_ends_at: trialEndsAt.toISOString(), is_paid: false }])
+                .insert([{
+                    email: cleanEmail,
+                    name: name || '',
+                    trial_ends_at: trialEndsAt.toISOString(),
+                    is_paid: false
+                }])
                 .select()
                 .single();
 
             if (createErr) throw createErr;
             user = newUser;
+        } else if (name && !user.name) {
+            await supabase.from('users').update({ name }).eq('email', cleanEmail);
         }
 
-        // 3. Evaluate access: Check if trial is still active or user has paid
-        const trialActive = new Date(user.trial_ends_at) > now;
-        const hasActiveAccess = trialActive || user.is_paid;
+        const trialActive = user.trial_ends_at ? new Date(user.trial_ends_at) > now : false;
+        const hasActiveAccess = trialActive || !!user.is_paid;
 
         return {
             statusCode: 200,
