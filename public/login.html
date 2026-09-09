@@ -32,8 +32,7 @@
         <!-- Header with Fashmar Logo Image -->
         <div class="text-center space-y-2">
             <div class="flex justify-center mb-2">
-                <img src="https://imglink.cc/cdn/nHfc8Ym7TU.png" alt="Fashmar Logo" class="h-12 w-auto object-contain">
-            </div>
+                <img src="https://imglink.cc/cdn/y7AehhL5xW.jpeg" alt="Garcos Logo" class="h-20 w-auto object-contain">
             <h1 class="text-2xl font-black text-emerald-950 tracking-tight">Fashmar Enterprise Pro</h1>
             <p class="text-xs text-emerald-800/80 font-medium">Professional Garment Costing Suite Authentication</p>
         </div>
@@ -91,36 +90,19 @@
         </div>
 
         <!-- Subscription Plans Section -->
-        <div id="subscription-section" class="space-y-3 hidden border-t border-emerald-100 pt-4">
-            <p class="text-xs font-bold text-emerald-900 text-center">Your Trial Has Ended. Select a Plan:</p>
-
-            <button onclick="initRazorpayPayment('basic')"
-                class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
-                <div>
-                    <div class="text-xs font-black text-emerald-950">Basic Plan</div>
-                    <div class="text-[10px] text-emerald-800/80">Single garment calculation</div>
-                </div>
-                <span class="text-xs font-black text-emerald-700">₹399 / mo</span>
-            </button>
-
-            <button onclick="initRazorpayPayment('premium')"
-                class="w-full p-3 bg-emerald-600 text-white rounded-xl flex items-center justify-between text-left shadow-md transition-all">
-                <div>
-                    <div class="text-xs font-black">Premium Monthly Plan</div>
-                    <div class="text-[10px] text-emerald-100">Full calculation suite</div>
-                </div>
-                <span class="text-xs font-black">₹459 / mo</span>
-            </button>
-
-            <button onclick="initRazorpayPayment('pro_quarterly')"
-                class="w-full p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center justify-between text-left transition-all">
-                <div>
-                    <div class="text-xs font-black text-emerald-950">3 Months Quarterly Plan</div>
-                    <div class="text-[10px] text-emerald-800/80">Continuous multi-month access</div>
-                </div>
-                <span class="text-xs font-black text-emerald-700">₹1,299 / 3mo</span>
-            </button>
-        </div>
+    
+    <div class="space-y-3 border-t border-emerald-100 pt-4">
+        <p class="text-xs font-bold text-emerald-900 text-center">Choose Your Subscription Plan:</p>
+        <button onclick="initRazorpayPayment('basic')"
+            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-xl transition-colors">Choose
+            Basic Plan (₹399)</button>
+        <button onclick="initRazorpayPayment('premium')"
+            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-xl transition-colors">Choose
+            Premium Plan (₹459)</button>
+        <button onclick="initRazorpayPayment('pro_quarterly')"
+            class="w-full bg-emerald-900 hover:bg-emerald-950 text-white font-medium py-3 px-4 rounded-xl transition-colors">Choose
+            Quarterly Plan (₹1,299)</button>
+    </div>
 
         <!-- Back to Home -->
         <div class="text-center pt-2">
