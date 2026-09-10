@@ -13,7 +13,6 @@ exports.handler = async (event) => {
     try {
         const { email, planType } = JSON.parse(event.body);
 
-        // Individual plan mapping with unique attributes and amounts (in paisa)
         const planMapping = {
             basic: { amount: 39900, name: 'Garcos Basic Plan', reference: 'plan_basic_monthly' },
             premium: { amount: 45900, name: 'Garcos Premium Plan', reference: 'plan_premium_monthly' },

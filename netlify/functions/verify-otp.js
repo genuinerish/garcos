@@ -10,7 +10,6 @@ exports.handler = async (event) => {
         const { email, name, otp } = JSON.parse(event.body);
         const cleanEmail = email.toLowerCase().trim();
 
-        // 1. Admin Whitelist Bypass
         const adminEmails = ["genuinerish@gmail.com"];
         if (adminEmails.includes(cleanEmail)) {
             return {
@@ -31,7 +30,7 @@ exports.handler = async (event) => {
         if (error) throw error;
 
         if (!user) {
-            // 25 Days in milliseconds
+            // 25 Days internal operational trial window
             const trialDurationMs = 25 * 24 * 60 * 60 * 1000;
             const trialEndsAtDate = new Date(nowEpoch + trialDurationMs);
 
@@ -52,7 +51,6 @@ exports.handler = async (event) => {
             user = newUser;
         }
 
-        // Check trial status using trial_ends_at or trial_start fallback
         let trialActive = false;
         if (user.trial_ends_at) {
             trialActive = new Date(user.trial_ends_at) > now;
