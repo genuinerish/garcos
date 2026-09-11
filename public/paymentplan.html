@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +9,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
 
         @keyframes shine {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
         }
 
         .shiny-brand {
@@ -25,13 +36,15 @@
         }
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
 
     <!-- Navbar -->
     <header class="bg-white/80 backdrop-blur-md text-slate-900 py-4 px-6 sticky top-0 z-50 border-b border-slate-200">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <a href="index.html" class="text-base font-black tracking-wider uppercase shiny-brand">Garcos Pro</a>
-            <a href="index.html" class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors">
+            <a href="index.html"
+                class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors">
                 <i class="fa-solid fa-arrow-left"></i> Back to Home
             </a>
         </div>
@@ -40,55 +53,80 @@
     <!-- Main Pricing Plans Container -->
     <main class="flex-grow py-16 px-6 max-w-5xl mx-auto w-full space-y-12">
         <div class="text-center space-y-3">
-            <div class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
+            <div
+                class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
                 <i class="fa-solid fa-lock text-emerald-600"></i> Secure Subscription Portal
             </div>
             <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Select Your Subscription Tier</h1>
-            <p class="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">Choose a plan below to register your company details, verify via OTP, and proceed to payment.</p>
+            <p class="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">Choose a plan below to register your company
+                details, verify via OTP, and proceed to payment.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             <!-- Basic Plan Card -->
-            <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm flex flex-col justify-between transition-all hover:border-slate-300">
+            <div
+                class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm flex flex-col justify-between transition-all hover:border-slate-300">
                 <div>
-                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Standard Plan</div>
+                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Standard Plan
+                    </div>
                     <h3 class="text-xl font-black text-slate-900">Basic Costing</h3>
                     <div class="my-6">
                         <span class="text-4xl sm:text-5xl font-black text-slate-900">₹449</span>
                         <span class="text-xs text-slate-500 font-bold">/ month</span>
                     </div>
                     <ul class="space-y-3.5 text-xs text-slate-600 mb-8">
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Up to 20 Cost Sheet Calculations</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Single Garment Part Costing</li>
-                        <li class="flex items-center gap-3 text-slate-400 line-through"><i class="fa-solid fa-xmark text-slate-400 bg-slate-100 p-1 rounded-md"></i> PDF Cost Sheet Download</li>
-                        <li class="flex items-center gap-3 text-slate-400 line-through"><i class="fa-solid fa-xmark text-slate-400 bg-slate-100 p-1 rounded-md"></i> Multi-Currency Support</li>
+                        <li class="flex items-center gap-3"><i
+                                class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Up to 20
+                            Cost Sheet Calculations</li>
+                        <li class="flex items-center gap-3"><i
+                                class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Single
+                            Garment Part Costing</li>
+                        <li class="flex items-center gap-3 text-slate-400 line-through"><i
+                                class="fa-solid fa-xmark text-slate-400 bg-slate-100 p-1 rounded-md"></i> PDF Cost Sheet
+                            Download</li>
+                        <li class="flex items-center gap-3 text-slate-400 line-through"><i
+                                class="fa-solid fa-xmark text-slate-400 bg-slate-100 p-1 rounded-md"></i> Multi-Currency
+                            Support</li>
                     </ul>
                 </div>
-                <button onclick="openCheckoutModal('basic', '₹449')" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl text-center transition-all shadow-sm">
+                <button onclick="openCheckoutModal('basic', '₹449')"
+                    class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl text-center transition-all shadow-sm">
                     Choose Basic Plan
                 </button>
             </div>
 
             <!-- Pro Plan Card -->
-            <div class="bg-white text-slate-900 rounded-3xl border-2 border-emerald-600 p-8 shadow-xl flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-bl-2xl tracking-wider shadow-md">
+            <div
+                class="bg-white text-slate-900 rounded-3xl border-2 border-emerald-600 p-8 shadow-xl flex flex-col justify-between relative overflow-hidden">
+                <div
+                    class="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-bl-2xl tracking-wider shadow-md">
                     Most Popular
                 </div>
                 <div>
-                    <div class="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Advanced Plan</div>
+                    <div class="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Advanced Plan
+                    </div>
                     <h3 class="text-xl font-black text-slate-900">Pro Suite</h3>
                     <div class="my-6">
                         <span class="text-4xl sm:text-5xl font-black text-emerald-600">₹499</span>
                         <span class="text-xs text-slate-500 font-bold">/ month</span>
                     </div>
                     <ul class="space-y-3.5 text-xs text-slate-600 mb-8">
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Unlimited Cost Sheet Calculations</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Multi-Part Co-Ord Set Management</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Full PDF & CSV Cost Sheet Downloads</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Multi-Currency Support & Exchange Rates</li>
+                        <li class="flex items-center gap-3"><i
+                                class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Unlimited
+                            Cost Sheet Calculations</li>
+                        <li class="flex items-center gap-3"><i
+                                class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Multi-Part
+                            Co-Ord Set Management</li>
+                        <li class="flex items-center gap-3"><i
+                                class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i> Full PDF &
+                            CSV Cost Sheet Downloads</li>
+                        <li class="flex items-center gap-3"><i
+                                class="fa-solid fa-check text-emerald-600 bg-emerald-50 p-1 rounded-md"></i>
+                            Multi-Currency Support & Exchange Rates</li>
                     </ul>
                 </div>
-                <button onclick="openCheckoutModal('pro', '₹499')" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl text-center transition-all shadow-lg shadow-emerald-600/30">
+                <button onclick="openCheckoutModal('pro', '₹499')"
+                    class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl text-center transition-all shadow-lg shadow-emerald-600/30">
                     Choose Pro Plan
                 </button>
             </div>
@@ -96,47 +134,58 @@
     </main>
 
     <!-- Registration & OTP Modal -->
-    <div id="checkout-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="checkout-modal"
+        class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl border border-slate-200 p-8 max-w-md w-full shadow-2xl space-y-6 relative">
-            <button onclick="closeCheckoutModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-900 transition-colors">
+            <button onclick="closeCheckoutModal()"
+                class="absolute top-6 right-6 text-slate-400 hover:text-slate-900 transition-colors">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
 
             <div class="space-y-1">
-                <span id="modal-plan-tag" class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Selected Plan</span>
+                <span id="modal-plan-tag"
+                    class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Selected Plan</span>
                 <h2 id="modal-plan-title" class="text-xl font-black text-slate-900">Company Registration</h2>
-                <p class="text-xs text-slate-500">Provide your company details and verify your email via OTP to continue.</p>
+                <p class="text-xs text-slate-500">Provide your company details and verify your email via OTP to
+                    continue.</p>
             </div>
 
             <!-- Step 1: Details Form -->
             <div id="step-details-form" class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="block text-xs font-bold text-slate-700">Company Name</label>
-                    <input type="text" id="input-company" placeholder="e.g. Crowntex Clothing" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
+                    <input type="text" id="input-company" placeholder="e.g. Crowntex Clothing"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
                 </div>
 
                 <div class="space-y-1.5">
                     <label class="block text-xs font-bold text-slate-700">Corporate Email Address</label>
-                    <input type="email" id="input-email" placeholder="name@company.com" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
+                    <input type="email" id="input-email" placeholder="name@company.com"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
                 </div>
 
-                <button onclick="requestRegistrationOtp()" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-sm">
+                <button onclick="requestRegistrationOtp()"
+                    class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-sm">
                     Send Verification OTP
                 </button>
             </div>
 
             <!-- Step 2: OTP Verification Box -->
             <div id="step-otp-box" class="space-y-4 hidden">
-                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-[11px] text-emerald-800 font-medium text-center">
-                    OTP sent to <span id="displayed-email" class="font-bold underline"></span> (Use <strong class="text-emerald-900">123456</strong> for testing)
+                <div
+                    class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-[11px] text-emerald-800 font-medium text-center">
+                    OTP sent to <span id="displayed-email" class="font-bold underline"></span> (Use <strong
+                        class="text-emerald-900">123456</strong> for testing)
                 </div>
 
                 <div class="space-y-1.5">
                     <label class="block text-xs font-bold text-slate-700">Enter 6-Digit OTP</label>
-                    <input type="text" id="input-otp" maxlength="6" placeholder="123456" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center tracking-widest text-sm font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
+                    <input type="text" id="input-otp" maxlength="6" placeholder="123456"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center tracking-widest text-sm font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
                 </div>
 
-                <button onclick="verifyAndProceedToPayment()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-lg shadow-emerald-600/30">
+                <button onclick="verifyAndProceedToPayment()"
+                    class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-lg shadow-emerald-600/30">
                     Verify & Proceed to Payment
                 </button>
             </div>
@@ -148,7 +197,8 @@
         <p>© 2026 Garcos Enterprise Pro · A Sub-Brand Product of Fashmer</p>
     </footer>
 
-    <!-- Script Handling Registration & Storage -->
+    <!-- Script Handling Registration, Razorpay Gateway & Storage -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         let selectedPlan = 'basic';
         let planPrice = '₹449';
@@ -158,10 +208,10 @@
         function openCheckoutModal(planType, price) {
             selectedPlan = planType;
             planPrice = price;
-            
+
             document.getElementById('modal-plan-tag').innerText = planType.toUpperCase() + ' PLAN (' + price + '/mo)';
             document.getElementById('modal-plan-title').innerText = planType === 'pro' ? 'Pro Suite Subscription' : 'Basic Costing Subscription';
-            
+
             document.getElementById('step-details-form').classList.remove('hidden');
             document.getElementById('step-otp-box').classList.add('hidden');
             document.getElementById('input-company').value = '';
@@ -200,16 +250,46 @@
                 company: pendingCompany,
                 email: pendingEmail,
                 plan: selectedPlan,
-                status: 'active',
+                status: 'pending_payment',
                 timestamp: new Date().toISOString()
             };
 
             localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
-            localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
+            closeCheckoutModal();
 
-            alert('Payment Successful! Welcome to Garcos Pro ' + selectedPlan.toUpperCase() + '. Redirecting to workspace...');
-            window.location.href = 'app.html';
+            const options = {
+                "key": "rzp_live_YOUR_ACTUAL_KEY_HERE",
+                "amount": selectedPlan === 'pro' ? 49900 : 44900,
+                "currency": "INR",
+                "name": "Garcos Pro",
+                "description": selectedPlan.toUpperCase() + " Monthly Subscription",
+                "prefill": {
+                    "email": pendingEmail,
+                    "name": pendingCompany
+                },
+                "theme": {
+                    "color": "#059669"
+                },
+                "handler": function (response) {
+                    userRecord.status = 'active';
+                    userRecord.paymentId = response.razorpay_payment_id;
+                    localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
+                    localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
+
+                    window.location.href = 'app.html';
+                },
+                "modal": {
+                    "ondismiss": function () {
+                        alert('Payment window closed. Your registration is saved; you can sign in anytime to complete payment.');
+                        window.location.href = 'login.html';
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
         }
     </script>
 </body>
+
 </html>
