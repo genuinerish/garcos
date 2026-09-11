@@ -20,7 +20,7 @@ exports.handler = async (event) => {
         let rowTotalsData = [];
 
         if (fabricTypeMode === 'woven') {
-            // Handled via simple frontend input if woven
+            // Handled via frontend
         } else {
             measurementSections.forEach((card) => {
                 let multiplier = parseFloat(card.multiplier) || 1;
