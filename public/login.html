@@ -238,23 +238,27 @@
                 return;
             }
 
-            const userRecordStr = localStorage.getItem('garcos_user_' + attemptingEmail);
+           const userRecordStr = localStorage.getItem('garcos_user_' + attemptingEmail);
             if (userRecordStr) {
                 const userRecord = JSON.parse(userRecordStr);
 
-                // If payment was never completed, route them back to payment plan page
                 if (userRecord.status === 'pending_payment') {
                     alert('Your previous payment was not completed. Redirecting to complete checkout.');
                     window.location.href = 'paymentplan.html';
                     return;
                 }
 
+                // Check 28-day expiry
+                if (userRecord.expiresAt && new Date() > new Date(userRecord.expiresAt)) {
+                    userRecord.status = 'expired';
+                    localStorage.setItem('garcos_user_' + attemptingEmail, JSON.stringify(userRecord));
+                    alert('Your 28-day Pro Plan subscription has expired. Please renew your subscription.');
+                    window.location.href = 'paymentplan.html';
+                    return;
+                }
+
                 localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
-                alert('Login Successful! Welcome back, ' + userRecord.company + ' (' + userRecord.plan.toUpperCase() + ' Plan).');
                 window.location.href = 'app.html';
-            } else {
-                alert('Account record not found. Please select a subscription plan first.');
-                window.location.href = 'paymentplan.html';
             }
         }
     </script>
