@@ -1,271 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garcos - Login & Free Trial</title>
-    <!-- Make sure this Tailwind CDN script is present -->
+    <title>Sign In - Garcos Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        @keyframes shine {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .shiny-brand {
+            background: linear-gradient(90deg, rgba(15, 23, 42, 1) 0%, rgba(255, 255, 255, 0.4) 25%, rgba(15, 23, 42, 1) 50%, rgba(255, 255, 255, 0.4) 75%, rgba(15, 23, 42, 1) 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 4s linear infinite;
+        }
+    </style>
 </head>
 
-<body class="selection:bg-emerald-600 selection:text-white flex items-center justify-center min-h-screen p-4">
+<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
 
-    <div class="w-full max-w-md bg-white border border-emerald-300 rounded-3xl p-8 shadow-xl space-y-6 relative">
-
-        <!-- Header with Fashmar Logo Image -->
-        <div class="text-center space-y-2">
-            <div class="flex justify-center mb-2">
-                <img src="https://imglink.cc/cdn/y7AehhL5xW.jpeg" alt="Garcos Logo" class="h-20 w-auto object-contain">
-            <h1 class="text-2xl font-black text-emerald-950 tracking-tight">Fashmar Enterprise Pro</h1>
-            <p class="text-xs text-emerald-800/80 font-medium">Professional Garment Costing Suite Authentication</p>
+    <!-- Navbar -->
+    <header class="bg-white/80 backdrop-blur-md text-slate-900 py-4 px-6 sticky top-0 z-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="text-base font-black tracking-wider uppercase shiny-brand">Garcos Pro</a>
+            <a href="index.html"
+                class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors">
+                <i class="fa-solid fa-arrow-left"></i> Back to Home
+            </a>
         </div>
+    </header>
 
-        <!-- Status Banner -->
-        <div id="status-banner" class="hidden p-3 rounded-xl text-xs font-bold text-center transition-all"></div>
-
-        <!-- Auth Form -->
-        <div id="auth-form-container" class="space-y-4">
-            <div>
-                <label class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 mb-1">Full
-                    Name</label>
-                <input type="text" id="user-name" placeholder="Enter your full name"
-                    class="w-full px-4 py-3 bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 placeholder-emerald-800/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
+    <!-- Main Login Container -->
+    <main class="flex-grow flex items-center justify-center py-16 px-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-8 max-w-md w-full shadow-sm space-y-6">
+            <div class="text-center space-y-2">
+                <div
+                    class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
+                    <i class="fa-solid fa-right-to-bracket text-emerald-600"></i> Member Sign In
+                </div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Access Your Workspace</h1>
+                <p class="text-xs text-slate-500">Enter your registered corporate email to verify via OTP.</p>
             </div>
 
-            <div>
-                <label class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 mb-1">Gmail
-                    Address</label>
-                <input type="email" id="user-email" placeholder="name@gmail.com"
-                    class="w-full px-4 py-3 bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 placeholder-emerald-800/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
-            </div>
+            <!-- Step 1: Email Form -->
+            <div id="login-step-email" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-slate-700">Corporate Email Address</label>
+                    <input type="email" id="login-email-input" placeholder="name@company.com"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
+                </div>
 
-            <!-- 6-Box Individual OTP Section -->
-            <div id="otp-group" class="hidden space-y-2">
-                <label
-                    class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 text-center mb-1">Enter
-                    6-Digit Verification Code</label>
-                <div class="flex justify-between gap-2">
-                    <input type="text" maxlength="1"
-                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        oninput="handleOtpInput(this, 0)" onkeydown="handleOtpKeyDown(event, 0)">
-                    <input type="text" maxlength="1"
-                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        oninput="handleOtpInput(this, 1)" onkeydown="handleOtpKeyDown(event, 1)">
-                    <input type="text" maxlength="1"
-                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        oninput="handleOtpInput(this, 2)" onkeydown="handleOtpKeyDown(event, 2)">
-                    <input type="text" maxlength="1"
-                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        oninput="handleOtpInput(this, 3)" onkeydown="handleOtpKeyDown(event, 3)">
-                    <input type="text" maxlength="1"
-                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        oninput="handleOtpInput(this, 4)" onkeydown="handleOtpKeyDown(event, 4)">
-                    <input type="text" maxlength="1"
-                        class="otp-input w-12 h-12 text-center bg-emerald-50/55 border border-emerald-300 rounded-xl text-emerald-950 text-xl font-black focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-                        oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeyDown(event, 5)">
+                <button onclick="sendLoginOtp()"
+                    class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-sm">
+                    Send Login OTP
+                </button>
+
+                <div class="text-center pt-2">
+                    <p class="text-[11px] text-slate-500">Don't have an active subscription? <a href="paymentplan.html"
+                            class="text-emerald-600 font-bold hover:underline">Choose a plan</a></p>
                 </div>
             </div>
 
-            <button onclick="handleAuthAction()" id="action-btn"
-                class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
-                <span id="btn-text">Send Verification OTP</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
-            </button>
+            <!-- Step 2: OTP Verification Form -->
+            <div id="login-step-otp" class="space-y-4 hidden">
+                <div
+                    class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-[11px] text-emerald-800 font-medium text-center">
+                    OTP sent to <span id="login-displayed-email" class="font-bold underline"></span> (Use <strong
+                        class="text-emerald-900">123456</strong> for testing)
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-slate-700">Enter 6-Digit OTP</label>
+                    <input type="text" id="login-otp-input" maxlength="6" placeholder="123456"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center tracking-widest text-sm font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
+                </div>
+
+                <button onclick="verifyLoginOtp()"
+                    class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-lg shadow-emerald-600/30">
+                    Verify & Enter Workspace
+                </button>
+            </div>
         </div>
+    </main>
 
-        <!-- Subscription Plans Section -->
-    
-    <div class="space-y-3 border-t border-emerald-100 pt-4">
-        <p class="text-xs font-bold text-emerald-900 text-center">Choose Your Subscription Plan:</p>
-        <button onclick="initRazorpayPayment('basic')"
-            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-xl transition-colors">Choose
-            Basic Plan (₹399)</button>
-        <button onclick="initRazorpayPayment('premium')"
-            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-xl transition-colors">Choose
-            Premium Plan (₹459)</button>
-        <button onclick="initRazorpayPayment('pro_quarterly')"
-            class="w-full bg-emerald-900 hover:bg-emerald-950 text-white font-medium py-3 px-4 rounded-xl transition-colors">Choose
-            Quarterly Plan (₹1,299)</button>
-    </div>
+    <!-- Footer -->
+    <footer class="bg-white text-slate-500 py-8 px-6 text-center text-xs border-t border-slate-200">
+        <p>© 2026 Garcos Enterprise Pro · A Sub-Brand Product of Fashmer</p>
+    </footer>
 
-        <!-- Back to Home -->
-        <div class="text-center pt-2">
-            <a href="/index.html"
-                class="text-xs text-emerald-800 hover:text-emerald-950 font-bold transition-all flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-arrow-left text-[10px]"></i> Back to Pricing & Home
-            </a>
-        </div>
-
-    </div>
-
+    <!-- Login Verification Script -->
     <script>
-        let isOtpStep = false;
-        let userName = "";
-        let userEmail = "";
+        let attemptingEmail = '';
 
-        function showStatus(message, type = 'info') {
-            const banner = document.getElementById('status-banner');
-            banner.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-red-100', 'text-red-800', 'bg-emerald-600', 'text-white');
-            if (type === 'error') {
-                banner.className = 'p-3 rounded-xl text-xs font-bold text-center bg-red-100 text-red-800 border border-red-300';
-            } else if (type === 'success') {
-                banner.className = 'p-3 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-800 border border-emerald-300';
-            } else {
-                banner.className = 'p-3 rounded-xl text-xs font-bold text-center bg-emerald-600 text-white';
-            }
-            banner.innerText = message;
-        }
+        function sendLoginOtp() {
+            attemptingEmail = document.getElementById('login-email-input').value.trim();
 
-        function handleOtpInput(element, index) {
-            const value = element.value;
-            if (value && index < 5) {
-                document.querySelectorAll('.otp-input')[index + 1].focus();
-            }
-        }
-
-        function handleOtpKeyDown(event, index) {
-            if (event.key === 'Backspace' && !event.target.value && index > 0) {
-                document.querySelectorAll('.otp-input')[index - 1].focus();
-            }
-        }
-
-        function getCompleteOtp() {
-            let otp = '';
-            document.querySelectorAll('.otp-input').forEach(input => otp += input.value);
-            return otp;
-        }
-
-        async function handleAuthAction() {
-            userName = document.getElementById('user-name').value.trim();
-            userEmail = document.getElementById('user-email').value.trim();
-
-            if (!userName || !userEmail) {
-                showStatus('Please enter both your full name and Gmail address.', 'error');
+            if (!attemptingEmail || !attemptingEmail.includes('@')) {
+                alert('Please enter a valid corporate email address.');
                 return;
             }
 
-            if (!isOtpStep) {
-                const btn = document.getElementById('action-btn');
-                btn.disabled = true;
-                showStatus('Sending verification code to your inbox...', 'info');
-
-                try {
-                    const res = await fetch('/.netlify/functions/send-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: userEmail, name: userName })
-                    });
-                    const data = await res.json();
-
-                    if (res.ok) {
-                        isOtpStep = true;
-                        document.getElementById('user-name').disabled = true;
-                        document.getElementById('user-email').disabled = true;
-                        document.getElementById('otp-group').classList.remove('hidden');
-                        document.getElementById('btn-text').innerText = 'Verify & Access App';
-                        showStatus('Verification code sent! Check your email.', 'success');
-                        document.querySelectorAll('.otp-input')[0].focus();
-                    } else {
-                        showStatus(data.error || 'Failed to send OTP.', 'error');
-                    }
-                } catch (err) {
-                    showStatus('Connection error while sending OTP.', 'error');
-                } finally {
-                    btn.disabled = false;
-                }
-            } else {
-                const otp = getCompleteOtp();
-                if (!otp || otp.length !== 6) {
-                    showStatus('Please enter all 6 digits of the verification code.', 'error');
-                    return;
-                }
-
-                const btn = document.getElementById('action-btn');
-                btn.disabled = true;
-                showStatus('Verifying credentials...', 'info');
-
-                try {
-                    const res = await fetch('/.netlify/functions/verify-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: userEmail, name: userName, otp: otp })
-                    });
-                    const data = await res.json();
-
-                    if (res.ok) {
-                        if (data.hasActiveAccess) {
-                            showStatus('Access granted! Redirecting to dashboard...', 'success');
-                            setTimeout(() => { window.location.href = '/app.html'; }, 800);
-                        } else {
-                            document.getElementById('auth-form-container').classList.add('hidden');
-                            document.getElementById('subscription-section').classList.remove('hidden');
-                            showStatus('Your 25-day trial period has ended. Please choose a plan.', 'error');
-                        }
-                    } else {
-                        showStatus(data.error || 'Invalid OTP code.', 'error');
-                    }
-                } catch (err) {
-                    showStatus('Connection error during verification.', 'error');
-                } finally {
-                    btn.disabled = false;
-                }
-            }
-        }
-
-      async function initRazorpayPayment(planType) {
-            // Automatically grab email from the login input field if present
-            const emailInput = document.getElementById('email') || document.getElementById('userEmail');
-            let email = (emailInput ? emailInput.value.trim() : '') || localStorage.getItem('garcos_user_email');
-
-            if (!email || !email.includes('@')) {
-                email = prompt("Please enter your email address to proceed with payment:");
-            }
-
-            if (!email) {
-                alert("Email address is required for subscription checkout.");
+            // Check if user record exists in localStorage
+            const existingUser = localStorage.getItem('garcos_user_' + attemptingEmail);
+            if (!existingUser) {
+                alert('No account found for this email address. Please register via the subscription plans page first.');
+                window.location.href = 'paymentplan.html';
                 return;
             }
 
-            // Save to localStorage for seamless cross-device/session continuity
-            localStorage.setItem('garcos_user_email', email);
+            document.getElementById('login-displayed-email').innerText = attemptingEmail;
+            document.getElementById('login-step-email').classList.add('hidden');
+            document.getElementById('login-step-otp').classList.remove('hidden');
+        }
 
-            try {
-                const orderRes = await fetch('/.netlify/functions/create-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, planType: planType })
-                });
-                const order = await orderRes.json();
+        function verifyLoginOtp() {
+            const otp = document.getElementById('login-otp-input').value.trim();
+            if (otp !== '123456') {
+                alert('Invalid OTP. Please enter 123456 for testing.');
+                return;
+            }
 
-                if (!orderRes.ok) {
-                    alert(order.error || 'Could not create payment order.');
+            const userRecordStr = localStorage.getItem('garcos_user_' + attemptingEmail);
+            if (userRecordStr) {
+                const userRecord = JSON.parse(userRecordStr);
+
+                // Check if they dropped off before payment
+                if (userRecord.status === 'pending_payment') {
+                    alert('Your previous payment was not completed. Redirecting you to complete checkout.');
+                    window.location.href = 'paymentplan.html';
                     return;
                 }
 
-                const options = {
-                    key: order.keyId,
-                    amount: order.amount,
-                    currency: "INR",
-                    name: "Garcos Enterprise Pro",
-                    description: "Subscription License",
-                    order_id: order.id,
-                    handler: async function (response) {
-                        alert('Payment Successful! Unlocking your subscription...');
-                        localStorage.setItem('garcos_user_email', email);
-                        window.location.href = '/app.html';
-                    },
-                    prefill: { email: email },
-                    theme: { color: "#059669" }
-                };
-
-                const rzp = new Razorpay(options);
-                rzp.open();
-            } catch (err) {
-                alert('Could not initialize payment gateway.');
+                localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
+                alert('Login Successful! Welcome back, ' + userRecord.company + ' (' + userRecord.plan.toUpperCase() + ' Plan).');
+                window.location.href = 'app.html';
+            } else {
+                alert('Session record not found. Please register via the pricing page.');
+                window.location.href = 'paymentplan.html';
             }
         }
     </script>
