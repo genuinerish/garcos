@@ -1177,350 +1177,70 @@
             showToast('Fabric costs reset to auto-calculated consumption');
         }
 
-        async function calculateAllCosting() {
-            syncExpensesStateFromDOM();
+       // Unit factor: 1 inch = 2.54 cm -> (2.54 * 2.54) = 6.4516
+        const unitFactor = (appState.measurementUnit === 'inch') ? (2.54 * 2.54) : 1.0;
 
-            let lossPercent = getElValNum('loss-percent', 0);
-            let fabricRates = {};
-            let fabricGsms = {};
-
-            appState.fabricColumns.forEach((fab, fabIdx) => {
-                let subtotal = 0;
-                document.querySelectorAll(`.fab-${fabIdx}-cost`).forEach(input => {
-                    subtotal += parseFloat(input.value) || 0;
-                });
-
-                setElText(`fab-${fabIdx}-subtotal`, formatRupee(subtotal));
-
-                let loss = subtotal * (lossPercent / 100);
-                setElText(`fab-${fabIdx}-loss`, formatRupee(loss));
-
-                let gtotal = subtotal + loss;
-                setElText(`fab-${fabIdx}-gtotal`, formatRupee(gtotal));
-
-                fabricRates[fab.id] = gtotal;
-
-                const gsmInput = document.getElementById(`fab-gsm-${fabIdx}`);
-                let gsmVal = gsmInput ? parseFloat(gsmInput.value) : (parseFloat(fab.gsm) || 0);
-                fabricGsms[fab.id] = isNaN(gsmVal) ? 0 : gsmVal;
-            });
-
-            const primaryRate = (appState.fabricColumns[0] && fabricRates[appState.fabricColumns[0].id]) ? fabricRates[appState.fabricColumns[0].id] : 0;
-            const fabUnit = appState.fabricTypeMode === 'woven' ? '/meter' : '/kg';
-            setElText('total-fab-rate-display', formatRupee(primaryRate) + " " + fabUnit);
-
-            let totalGarmentWeight = 0;
-            let totalCalculatedFabricCost = 0;
-
-            // Part-Wise aggregation
-            let partBreakdown = {};
-            appState.garmentParts.forEach(p => {
-                partBreakdown[p.id] = { id: p.id, name: p.name, color: p.color || 'indigo', weight: 0, cost: 0 };
-            });
-
-            // Unit factor: 1 inch = 2.54 cm -> (2.54 * 2.54) = 6.4516
-            const unitFactor = (appState.measurementUnit === 'inch') ? (2.54 * 2.54) : 1.0;
-
-            if (appState.fabricTypeMode === 'woven') {
-                const wovenCons = getElValNum('woven-consumption', 0);
-                totalGarmentWeight = wovenCons;
-                totalCalculatedFabricCost = wovenCons * primaryRate;
-                const firstPartId = appState.garmentParts[0] ? appState.garmentParts[0].id : 'part-1';
-                if (partBreakdown[firstPartId]) {
-                    partBreakdown[firstPartId].weight = wovenCons;
-                    partBreakdown[firstPartId].cost = totalCalculatedFabricCost;
-                }
-            } else {
-                // Instead of calculating locally, we can send inputs to Netlify backend or run client-side calculation securely.
-                // Let's secure the math calculation via Netlify Serverless function as requested:
-                try {
-                    const payload = {
-                        fabricTypeMode: appState.fabricTypeMode,
-                        measurementUnit: appState.measurementUnit,
-                        fabricGsms,
-                        fabricRates,
-                        measurementSections: appState.measurementSections,
-                        garmentParts: appState.garmentParts
-                    };
-
-                    const response = await fetch('/.netlify/functions/calculate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        const srvResult = await response.json();
-                        if (srvResult && srvResult.success) {
-                            totalGarmentWeight = srvResult.totalGarmentWeight || 0;
-                            totalCalculatedFabricCost = srvResult.totalCalculatedFabricCost || 0;
-                            if (srvResult.partBreakdown) {
-                                partBreakdown = srvResult.partBreakdown;
-                            }
-                            if (srvResult.cardWeights) {
-                                srvResult.cardWeights.forEach(cw => {
-                                    const cardEl = document.getElementById(cw.cardId);
-                                    if (cardEl) {
-                                        const totDisp = cardEl.querySelector('.section-total-wt');
-                                        if (totDisp) totDisp.innerText = (cw.weight || 0).toFixed(3) + " kg";
-                                    }
-                                });
-                            }
-                            if (srvResult.rowTotals) {
-                                srvResult.rowTotals.forEach(rt => {
-                                    const cardEl = document.getElementById(rt.cardId);
-                                    if (cardEl) {
-                                        const weightRows = cardEl.querySelectorAll('.weight-row');
-                                        if (weightRows[rt.rowIndex]) {
-                                            const tCell = weightRows[rt.rowIndex].querySelector('.row-total-val');
-                                            if (tCell) tCell.innerText = (rt.rowTotal || 0).toFixed(1);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error('Serverless calculation fallback to local:', e);
-                    // Fallback local logic if network fails
-                    document.querySelectorAll('.measurement-card').forEach((card) => {
-                        let multiplier = parseFloat(card.querySelector('.panel-multiplier')?.value) || 1;
-                        let assignedFabricKey = card.querySelector('.component-fabric-select')?.value || (appState.fabricColumns[0] ? appState.fabricColumns[0].id : 'fab-0');
-                        let assignedPartKey = card.querySelector('.component-part-select')?.value || (appState.garmentParts[0] ? appState.garmentParts[0].id : 'part-1');
-                        let cardTotalWeight = 0;
-
-                        let activeFabricGsm = fabricGsms[assignedFabricKey] || (appState.fabricColumns[0] && fabricGsms[appState.fabricColumns[0].id]) || 0;
-
-                        let rowTotals = [];
-                        card.querySelectorAll('.weight-row').forEach(row => {
-                            let valInput = row.querySelector('.val-input');
-                            let val = parseFloat(valInput?.value) || 0;
-                            let allowInput = row.querySelector('.allow-input');
-                            let allow = parseFloat(allowInput?.value) || 0;
-
-                            let rowTotal = val > 0 ? (val + allow) : 0;
-                            let totalCell = row.querySelector('.row-total-val');
-                            if (totalCell) totalCell.innerText = rowTotal.toFixed(1);
-
-                            if (rowTotal > 0) {
-                                rowTotals.push(rowTotal);
-                            }
-                        });
-
-                        let totalLength = 0;
-                        let totalWidth = 0;
-
-                        if (rowTotals.length >= 3) {
-                            totalLength = rowTotals[0] + rowTotals[2];
-                            totalWidth = rowTotals[1];
-                        } else if (rowTotals.length === 2) {
-                            totalLength = rowTotals[0];
-                            totalWidth = rowTotals[1];
-                        } else if (rowTotals.length === 1) {
-                            totalLength = rowTotals[0];
-                            totalWidth = 1;
-                        }
-
-                        if (activeFabricGsm > 0 && totalLength > 0 && totalWidth > 0) {
-                            cardTotalWeight = (totalLength * totalWidth * activeFabricGsm * multiplier * unitFactor) / 10000000;
-                        }
-
-                        let totalDisplay = card.querySelector('.section-total-wt');
-                        if (totalDisplay) totalDisplay.innerText = cardTotalWeight.toFixed(3) + " kg";
-
-                        totalGarmentWeight += cardTotalWeight;
-
-                        let assignedRate = fabricRates[assignedFabricKey] || 0;
-                        let cardCost = cardTotalWeight * assignedRate;
-                        totalCalculatedFabricCost += cardCost;
-
-                        if (!partBreakdown[assignedPartKey]) {
-                            partBreakdown[assignedPartKey] = { id: assignedPartKey, name: 'Part', color: 'indigo', weight: 0, cost: 0 };
-                        }
-                        partBreakdown[assignedPartKey].weight += cardTotalWeight;
-                        partBreakdown[assignedPartKey].cost += cardCost;
-                    });
-                }
+        if (appState.fabricTypeMode === 'woven') {
+            const wovenCons = getElValNum('woven-consumption', 0);
+            totalGarmentWeight = wovenCons;
+            totalCalculatedFabricCost = wovenCons * primaryRate;
+            const firstPartId = appState.garmentParts[0] ? appState.garmentParts[0].id : 'part-1';
+            if (partBreakdown[firstPartId]) {
+                partBreakdown[firstPartId].weight = wovenCons;
+                partBreakdown[firstPartId].cost = totalCalculatedFabricCost;
             }
+        } else {
+            // Secure serverless backend calculation call
+            try {
+                const payload = {
+                    fabricTypeMode: appState.fabricTypeMode,
+                    measurementUnit: appState.measurementUnit,
+                    fabricGsms,
+                    fabricRates,
+                    measurementSections: appState.measurementSections,
+                    garmentParts: appState.garmentParts
+                };
 
-            // Render Garment Part Itemized Breakdown in Summary
-            renderPartsBreakdownSummary(partBreakdown, totalGarmentWeight);
-
-            const weightLabel = appState.fabricTypeMode === 'woven' ? totalGarmentWeight.toFixed(2) + " m" : totalGarmentWeight.toFixed(3) + " kg";
-            setElText('grand-total-weight', weightLabel);
-            setElText('kpi-total-weight', weightLabel);
-
-            // Part-by-Part Matrix Totals
-            let sumAllFabricCosts = 0;
-            let sumAllCmtCosts = 0;
-            let sumAllDirectCosts = 0;
-            let sumAllRejectionVal = 0;
-            let sumAllPostRejection = 0;
-            let sumAllMargins = 0;
-            let sumAllExFactory = 0;
-            let sumAllCommissions = 0;
-            let sumAllEmbellishments = 0;
-            let sumAllTrims = 0;
-            let sumAllLogistics = 0;
-
-            let exchangeRate = getElValNum('exchange-rate', 1.0);
-            if (exchangeRate <= 0) exchangeRate = 1;
-
-            // Update Embellishment Row Totals
-            document.querySelectorAll('.embellishment-row').forEach((row) => {
-                let rTotal = 0;
-                appState.garmentParts.forEach(p => {
-                    const costInp = row.querySelector(`.part-cost-${p.id}`);
-                    rTotal += parseFloat(costInp?.value) || 0;
+                const response = await fetch('/.netlify/functions/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-                const totalTd = row.querySelector('.embellishment-row-total');
-                if (totalTd) totalTd.innerText = formatRupee(rTotal);
-                sumAllEmbellishments += rTotal;
-            });
 
-            // Update Trims Row Totals
-            document.querySelectorAll('.trim-row').forEach((row) => {
-                let rTotal = 0;
-                appState.garmentParts.forEach(p => {
-                    const costInp = row.querySelector(`.part-cost-${p.id}`);
-                    rTotal += parseFloat(costInp?.value) || 0;
-                });
-                const totalTd = row.querySelector('.trim-row-total');
-                if (totalTd) totalTd.innerText = formatRupee(rTotal);
-                sumAllTrims += rTotal;
-            });
-
-            // Update Logistics Row Totals
-            document.querySelectorAll('.logistics-row').forEach((row) => {
-                let rTotal = 0;
-                appState.garmentParts.forEach(p => {
-                    const costInp = row.querySelector(`.part-cost-${p.id}`);
-                    rTotal += parseFloat(costInp?.value) || 0;
-                });
-                const totalTd = row.querySelector('.logistics-row-total');
-                if (totalTd) totalTd.innerText = formatRupee(rTotal);
-                sumAllLogistics += rTotal;
-            });
-
-            appState.garmentParts.forEach(part => {
-                const fabInput = document.getElementById(`fabric-cost-${part.id}`);
-                let partFabric = 0;
-                if (fabInput) {
-                    if (fabInput.dataset.manual !== "true") {
-                        partFabric = partBreakdown[part.id] ? partBreakdown[part.id].cost : 0;
-                        fabInput.value = partFabric > 0 ? partFabric.toFixed(2) : '';
-                    } else {
-                        partFabric = parseFloat(fabInput.value) || 0;
+                if (response.ok) {
+                    const srvResult = await response.json();
+                    if (srvResult && srvResult.success) {
+                        totalGarmentWeight = srvResult.totalGarmentWeight || 0;
+                        totalCalculatedFabricCost = srvResult.totalCalculatedFabricCost || 0;
+                        if (srvResult.partBreakdown) {
+                            partBreakdown = srvResult.partBreakdown;
+                        }
+                        if (srvResult.cardWeights) {
+                            srvResult.cardWeights.forEach(cw => {
+                                const cardEl = document.getElementById(cw.cardId);
+                                if (cardEl) {
+                                    const totDisp = cardEl.querySelector('.section-total-wt');
+                                    if (totDisp) totDisp.innerText = (cw.weight || 0).toFixed(3) + " kg";
+                                }
+                            });
+                        }
+                        if (srvResult.rowTotals) {
+                            srvResult.rowTotals.forEach(rt => {
+                                const cardEl = document.getElementById(rt.cardId);
+                                if (cardEl) {
+                                    const weightRows = cardEl.querySelectorAll('.weight-row');
+                                    if (weightRows[rt.rowIndex]) {
+                                        const tCell = weightRows[rt.rowIndex].querySelector('.row-total-val');
+                                        if (tCell) tCell.innerText = (rt.rowTotal || 0).toFixed(1);
+                                    }
+                                }
+                            });
+                        }
                     }
                 }
-                sumAllFabricCosts += partFabric;
-
-                const cmtInput = document.getElementById(`cmt-cost-${part.id}`);
-                let partCmt = cmtInput ? (parseFloat(cmtInput.value) || 0) : 0;
-                sumAllCmtCosts += partCmt;
-
-                // Sum embellishments for this part
-                let partEmb = 0;
-                document.querySelectorAll(`.embellishment-row .part-cost-${part.id}`).forEach(inp => {
-                    partEmb += parseFloat(inp.value) || 0;
-                });
-
-                // Sum trims for this part
-                let partTrims = 0;
-                document.querySelectorAll(`.trim-row .part-cost-${part.id}`).forEach(inp => {
-                    partTrims += parseFloat(inp.value) || 0;
-                });
-
-                // Sum logistics for this part
-                let partLog = 0;
-                document.querySelectorAll(`.logistics-row .part-cost-${part.id}`).forEach(inp => {
-                    partLog += parseFloat(inp.value) || 0;
-                });
-
-                let partDirect = partFabric + partCmt + partEmb + partTrims;
-                setElText(`direct-cost-${part.id}`, formatRupee(partDirect));
-                sumAllDirectCosts += partDirect;
-
-                // Per-part rejection
-                const rejInp = document.getElementById(`rejection-pct-${part.id}`);
-                let partRejectionPct = (rejInp && rejInp.value !== '') ? (parseFloat(rejInp.value) || 0) : 0;
-                let partRejectionVal = partDirect * (partRejectionPct / 100);
-                setElText(`rejection-cost-${part.id}`, formatRupee(partRejectionVal));
-                sumAllRejectionVal += partRejectionVal;
-
-                let partPostRejection = partDirect + partRejectionVal;
-                setElText(`post-rejection-${part.id}`, formatRupee(partPostRejection));
-                sumAllPostRejection += partPostRejection;
-
-                // Per-part profit margin %
-                const marInp = document.getElementById(`margin-pct-${part.id}`);
-                let partMarginPct = (marInp && marInp.value !== '') ? (parseFloat(marInp.value) || 0) : 0;
-                let partMargin = partPostRejection * (partMarginPct / 100);
-                setElText(`margin-val-${part.id}`, formatRupee(partMargin));
-                sumAllMargins += partMargin;
-
-                let partExFactory = partPostRejection + partMargin + partLog;
-                setElText(`exfactory-${part.id}`, formatRupee(partExFactory));
-                sumAllExFactory += partExFactory;
-
-                // Per-part commission
-                const comInp = document.getElementById(`commission-pct-${part.id}`);
-                let partCommissionPct = (comInp && comInp.value !== '') ? (parseFloat(comInp.value) || 0) : 0;
-                let partCommissionVal = partExFactory * (partCommissionPct / 100);
-                setElText(`commission-cost-${part.id}`, formatRupee(partCommissionVal));
-                sumAllCommissions += partCommissionVal;
-
-                let partBuyerQuoteLocal = partExFactory + partCommissionVal;
-                let partBuyerQuoteConverted = partBuyerQuoteLocal > 0 ? (partBuyerQuoteLocal / exchangeRate) : 0;
-                setElText(`buyer-quote-${part.id}`, formatForeign(partBuyerQuoteConverted));
-            });
-
-            // Update Summary Badge Percentages
-            const hasRej = appState.garmentParts.some(p => {
-                const inp = document.getElementById(`rejection-pct-${p.id}`);
-                return inp && inp.value !== '';
-            });
-            setElText('rejection-pct-summary', hasRej ? `${sumAllDirectCosts > 0 ? ((sumAllRejectionVal / sumAllDirectCosts) * 100).toFixed(1) : 0}%` : '-');
-
-            const hasMargin = appState.garmentParts.some(p => {
-                const inp = document.getElementById(`margin-pct-${p.id}`);
-                return inp && inp.value !== '';
-            });
-            setElText('margin-pct-summary', hasMargin ? `${sumAllPostRejection > 0 ? ((sumAllMargins / sumAllPostRejection) * 100).toFixed(1) : 0}%` : '-');
-
-            const hasCom = appState.garmentParts.some(p => {
-                const inp = document.getElementById(`commission-pct-${p.id}`);
-                return inp && inp.value !== '';
-            });
-            setElText('commission-pct-summary', hasCom ? `${sumAllExFactory > 0 ? ((sumAllCommissions / sumAllExFactory) * 100).toFixed(1) : 0}%` : '-');
-
-            // Total Set Summary Column Values
-            setElText('total-set-fabric-cost', formatRupee(sumAllFabricCosts));
-            setElText('total-set-cmt-cost', formatRupee(sumAllCmtCosts));
-            setElText('fob-total', formatRupee(sumAllDirectCosts));
-
-            setElText('rejection-val-total', formatRupee(sumAllRejectionVal));
-            setElText('post-rejection-total', formatRupee(sumAllPostRejection));
-
-            setElText('margin-val', formatRupee(sumAllMargins));
-
-            let netFactoryCostRupees = sumAllExFactory;
-            setElText('final-total-local', formatRupee(netFactoryCostRupees));
-            setElText('kpi-factory-cost', formatRupee(netFactoryCostRupees));
-
-            setElText('commission-val-total', formatRupee(sumAllCommissions));
-
-            let finalBuyerCostLocal = netFactoryCostRupees + sumAllCommissions;
-            let convertedQuotePrice = finalBuyerCostLocal > 0 ? (finalBuyerCostLocal / exchangeRate) : 0;
-
-            setElText('final-total-converted', formatForeign(convertedQuotePrice));
-            setElText('quote-price-val', convertedQuotePrice.toFixed(2));
-            setElText('kpi-buyer-quote', formatForeign(convertedQuotePrice));
-            setElText('kpi-fabric-cost', formatRupee(sumAllFabricCosts));
-            setElText('kpi-direct-cost', formatRupee(sumAllDirectCosts));
-
-            // Update Visual Analytics Bar
-            updateCostAnalyticsBar(sumAllFabricCosts, sumAllCmtCosts, sumAllEmbellishments, sumAllTrims, sumAllMargins, sumAllLogistics, sumAllRejectionVal, netFactoryCostRupees);
+            } catch (e) {
+                console.error('Serverless calculation network error:', e);
+            }
         }
 
         function renderPartsBreakdownSummary(partBreakdown, totalWeight) {
