@@ -69,7 +69,7 @@
         </div>
 
         <div class="max-w-md mx-auto">
-            <!-- Pro Plan Card (Single Active Tier) -->
+            <!-- Pro Plan Card -->
             <div
                 class="bg-white text-slate-900 rounded-3xl border-2 border-emerald-600 p-8 shadow-xl flex flex-col justify-between relative overflow-hidden">
                 <div
@@ -81,7 +81,7 @@
                     <h3 class="text-xl font-black text-slate-900">Garcos Pro Monthly</h3>
                     <div class="my-6">
                         <span class="text-4xl sm:text-5xl font-black text-emerald-600">₹499</span>
-                        <span class="text-xs text-slate-500 font-bold">/ month</span>
+                        <span class="text-xs text-slate-500 font-bold">/ 28 days</span>
                     </div>
                     <ul class="space-y-3.5 text-xs text-slate-600 mb-8">
                         <li class="flex items-center gap-3"><i
@@ -98,7 +98,7 @@
                             Multi-Currency Support & Exchange Rates</li>
                     </ul>
                 </div>
-                <button onclick="openCheckoutModal('pro', '₹499')"
+                <button onclick="openCheckoutModal()"
                     class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl text-center transition-all shadow-lg shadow-emerald-600/30">
                     Get Started With Pro
                 </button>
@@ -116,8 +116,8 @@
             </button>
 
             <div class="space-y-1">
-                <span id="modal-plan-tag" class="text-[10px] font-black uppercase tracking-widest text-emerald-600">PRO
-                    PLAN (₹499/mo)</span>
+                <span class="text-[10px] font-black uppercase tracking-widest text-emerald-600">PRO PLAN (₹499 / 28
+                    Days)</span>
                 <h2 class="text-xl font-black text-slate-900">Company Registration</h2>
                 <p class="text-xs text-slate-500">Provide your company details and verify your email via OTP to
                     continue.</p>
@@ -137,7 +137,7 @@
                         class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
                 </div>
 
-                <button type="submit"
+                <button type="submit" id="send-otp-btn"
                     class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-sm">
                     Send Verification OTP
                 </button>
@@ -147,14 +147,12 @@
             <div id="step-otp-box" class="space-y-5 hidden">
                 <div
                     class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-[11px] text-emerald-800 font-medium text-center">
-                    OTP sent to <span id="displayed-email" class="font-bold underline"></span> <br><span
-                        class="text-[10px] text-emerald-600 font-bold">(Use 123456 for testing)</span>
+                    OTP sent to <span id="displayed-email" class="font-bold underline"></span>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-slate-700 text-center">Enter 6-Digit Verification
                         Code</label>
-                    <!-- 6-Box OTP Input Grid -->
                     <div class="flex justify-center gap-2 sm:gap-3" id="otp-inputs-container">
                         <input type="text" maxlength="1"
                             class="otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
@@ -190,24 +188,17 @@
         <p>© 2026 Garcos Enterprise Pro · A Sub-Brand Product of Fashmer</p>
     </footer>
 
-    <!-- Script Handling Registration, 6-Box OTP & Razorpay Gateway -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        let selectedPlan = 'pro';
-        let planPrice = '₹499';
         let pendingEmail = '';
         let pendingCompany = '';
 
-        function openCheckoutModal(planType, price) {
-            selectedPlan = planType;
-            planPrice = price;
-
+        function openCheckoutModal() {
             document.getElementById('step-details-form').classList.remove('hidden');
             document.getElementById('step-otp-box').classList.add('hidden');
             document.getElementById('input-company').value = '';
             document.getElementById('input-email').value = '';
             document.querySelectorAll('.otp-box').forEach(b => b.value = '');
-
             document.getElementById('checkout-modal').classList.remove('hidden');
         }
 
@@ -215,7 +206,7 @@
             document.getElementById('checkout-modal').classList.add('hidden');
         }
 
-        function handleDetailsSubmit(e) {
+        async function handleDetailsSubmit(e) {
             e.preventDefault();
             pendingCompany = document.getElementById('input-company').value.trim();
             pendingEmail = document.getElementById('input-email').value.trim();
@@ -225,17 +216,39 @@
                 return;
             }
 
-            document.getElementById('displayed-email').innerText = pendingEmail;
-            document.getElementById('step-details-form').classList.add('hidden');
-            document.getElementById('step-otp-box').classList.remove('hidden');
+            const btn = document.getElementById('send-otp-btn');
+            btn.innerText = 'Sending OTP...';
+            btn.disabled = true;
 
-            setTimeout(() => {
-                const firstBox = document.querySelector('.otp-box');
-                if (firstBox) firstBox.focus();
-            }, 100);
+            try {
+                const response = await fetch('/.netlify/functions/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingEmail })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to send OTP');
+                }
+
+                document.getElementById('displayed-email').innerText = pendingEmail;
+                document.getElementById('step-details-form').classList.add('hidden');
+                document.getElementById('step-otp-box').classList.remove('hidden');
+
+                setTimeout(() => {
+                    const firstBox = document.querySelector('.otp-box');
+                    if (firstBox) firstBox.focus();
+                }, 100);
+
+            } catch (error) {
+                alert('Error sending OTP: ' + error.message);
+            } finally {
+                btn.innerText = 'Send Verification OTP';
+                btn.disabled = false;
+            }
         }
 
-        // 6-Box OTP Auto-Advance Navigation Logic
         const otpBoxes = document.querySelectorAll('.otp-box');
         otpBoxes.forEach((box, index) => {
             box.addEventListener('input', (e) => {
@@ -275,7 +288,7 @@
             });
         });
 
-        function verifyAndProceedToPayment() {
+        async function verifyAndProceedToPayment() {
             let enteredOtp = '';
             otpBoxes.forEach(box => {
                 enteredOtp += box.value;
@@ -286,59 +299,68 @@
                 return;
             }
 
-            if (enteredOtp !== '123456') {
-                alert('Invalid OTP code. Please enter 123456 for testing.');
-                return;
-            }
+            try {
+                const response = await fetch('/.netlify/functions/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingEmail, otp: enteredOtp })
+                });
 
-            const userRecord = {
-                company: pendingCompany,
-                email: pendingEmail,
-                plan: 'pro',
-                status: 'pending_payment',
-                timestamp: new Date().toISOString()
-            };
-
-            localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
-            closeCheckoutModal();
-
-            const options = {
-                "key": "rzp_live_YOUR_ACTUAL_KEY_HERE",
-                "amount": 49900,
-                "currency": "INR",
-                "name": "Garcos Pro",
-                "description": "Pro Suite Monthly Subscription",
-                "prefill": {
-                    "email": pendingEmail,
-                    "name": pendingCompany
-                },
-                "theme": {
-                    "color": "#059669"
-                },
-               "handler": function (response) {
-                    const now = new Date();
-                    const expiryDate = new Date(now.getTime() + (28 * 24 * 60 * 60 * 1000)); // Exactly 28 days in milliseconds
-
-                    userRecord.status = 'active';
-                    userRecord.paymentId = response.razorpay_payment_id;
-                    userRecord.activatedAt = now.toISOString();
-                    userRecord.expiresAt = expiryDate.toISOString();
-
-                    localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
-                    localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
-
-                    window.location.href = 'app.html';
-                },
-                "modal": {
-                    "ondismiss": function () {
-                        alert('Payment window closed. Your registration is saved; you can sign in anytime to complete payment.');
-                        window.location.href = 'login.html';
-                    }
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Invalid or expired OTP code.');
                 }
-            };
 
-            const rzp = new Razorpay(options);
-            rzp.open();
+                const now = new Date();
+                const expiryDate = new Date(now.getTime() + (28 * 24 * 60 * 60 * 1000)); // Exactly 28 days
+
+                const userRecord = {
+                    company: pendingCompany,
+                    email: pendingEmail,
+                    plan: 'pro',
+                    status: 'pending_payment',
+                    activatedAt: now.toISOString(),
+                    expiresAt: expiryDate.toISOString()
+                };
+
+                localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
+                closeCheckoutModal();
+
+                const options = {
+                    "key": "rzp_live_YOUR_ACTUAL_KEY_HERE",
+                    "amount": 49900,
+                    "currency": "INR",
+                    "name": "Garcos Pro",
+                    "description": "Pro Suite Monthly Subscription (28 Days)",
+                    "prefill": {
+                        "email": pendingEmail,
+                        "name": pendingCompany
+                    },
+                    "theme": {
+                        "color": "#059669"
+                    },
+                    "handler": function (response) {
+                        userRecord.status = 'active';
+                        userRecord.paymentId = response.razorpay_payment_id;
+                        localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
+                        localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
+
+                        window.location.href = 'app.html';
+                    },
+                    "modal": {
+                        "ondismiss": function () {
+                            alert('Payment window closed. Your registration is saved; sign in anytime to complete payment.');
+                            window.location.href = 'login.html';
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+
+            } catch (error) {
+                alert('Verification failed: ' + error.message);
+            }
         }
     </script>
 </body>
