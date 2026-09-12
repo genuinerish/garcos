@@ -288,7 +288,7 @@
             });
         });
 
-        async function verifyAndProceedToPayment() {
+       async function verifyAndProceedToPayment() {
             let enteredOtp = '';
             otpBoxes.forEach(box => {
                 enteredOtp += box.value;
@@ -324,45 +324,12 @@
                 };
 
                 localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
-                closeCheckoutModal();
 
-                const options = {
-                    "key": "rzp_live_YOUR_ACTUAL_KEY_HERE",
-                    "amount": 49900,
-                    "currency": "INR",
-                    "name": "Garcos Pro",
-                    "description": "Pro Suite Monthly Subscription (28 Days)",
-                    "prefill": {
-                        "email": pendingEmail,
-                        "name": pendingCompany
-                    },
-                    "theme": {
-                        "color": "#059669"
-                    },
-                   "handler": function (response) {
-                        const now = new Date();
-                        const expiryDate = new Date(now.getTime() + (28 * 24 * 60 * 60 * 1000)); // Exactly 28 days
+                // Save active session temporarily so you can return or simulate, then redirect to your live payment page URL
+                localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
 
-                        userRecord.status = 'active';
-                        userRecord.paymentId = response.razorpay_payment_id;
-                        userRecord.activatedAt = now.toISOString();
-                        userRecord.expiresAt = expiryDate.toISOString();
-
-                        localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
-                        localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
-
-                        window.location.href = 'app.html';
-                    },
-                    "modal": {
-                        "ondismiss": function () {
-                            alert('Payment window closed. Your registration is saved; sign in anytime to complete payment.');
-                            window.location.href = 'login.html';
-                        }
-                    }
-                };
-
-                const rzp = new Razorpay(options);
-                rzp.open();
+                // DIRECT REDIRECT TO YOUR RAZORPAY PAYMENT PAGE/LINK (Replace with your actual link)
+                window.location.href = 'https://rzp.io/l/YOUR_RAZORPAY_PAYMENT_PAGE_LINK';
 
             } catch (error) {
                 alert('Verification failed: ' + error.message);
