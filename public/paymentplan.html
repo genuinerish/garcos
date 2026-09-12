@@ -339,9 +339,15 @@
                     "theme": {
                         "color": "#059669"
                     },
-                    "handler": function (response) {
+                   "handler": function (response) {
+                        const now = new Date();
+                        const expiryDate = new Date(now.getTime() + (28 * 24 * 60 * 60 * 1000)); // Exactly 28 days
+
                         userRecord.status = 'active';
                         userRecord.paymentId = response.razorpay_payment_id;
+                        userRecord.activatedAt = now.toISOString();
+                        userRecord.expiresAt = expiryDate.toISOString();
+
                         localStorage.setItem('garcos_user_' + pendingEmail, JSON.stringify(userRecord));
                         localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
 
