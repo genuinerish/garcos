@@ -142,7 +142,7 @@
     <script>
         let attemptingEmail = '';
 
-        async function handleEmailSubmit(e) {
+       async function handleEmailSubmit(e) {
             e.preventDefault();
             attemptingEmail = document.getElementById('login-email-input').value.trim();
 
@@ -151,26 +151,25 @@
                 return;
             }
 
-            const existingUser = localStorage.getItem('garcos_user_' + attemptingEmail);
-            if (!existingUser) {
-                alert('No account found for this email address. Redirecting to subscription plans.');
-                window.location.href = 'paymentplan.html';
-                return;
-            }
-
             const btn = document.getElementById('login-send-btn');
-            btn.innerText = 'Sending OTP...';
+            btn.innerText = 'Verifying Account...';
             btn.disabled = true;
 
             try {
                 const response = await fetch('/.netlify/functions/send-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: attemptingEmail })
+                    body: JSON.stringify({ email: attemptingEmail, isLogin: true })
                 });
 
                 const data = await response.json();
+
                 if (!response.ok) {
+                    if (data.redirect === 'paymentplan.html') {
+                        alert('No account found for this email address. Please choose a subscription plan.');
+                        window.location.href = 'paymentplan.html';
+                        return;
+                    }
                     throw new Error(data.error || 'Failed to send login OTP');
                 }
 
@@ -184,13 +183,12 @@
                 }, 100);
 
             } catch (error) {
-                alert('Error sending OTP: ' + error.message);
+                alert('Error: ' + error.message);
             } finally {
                 btn.innerText = 'Send Login OTP';
                 btn.disabled = false;
             }
         }
-
         function resetLoginForm() {
             document.getElementById('login-step-otp').classList.add('hidden');
             document.getElementById('login-step-email').classList.remove('hidden');
