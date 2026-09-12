@@ -238,58 +238,79 @@
         });
 
         async function verifyLoginOtp() {
-            let enteredOtp = '';
-            otpBoxes.forEach(box => {
-                enteredOtp += box.value;
-            });
-
-            if (enteredOtp.length < 6) {
-                alert('Please enter the complete 6-digit verification code.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/.netlify/functions/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: attemptingEmail, otp: enteredOtp })
+                let enteredOtp = '';
+                otpBoxes.forEach(box => {
+                    enteredOtp += box.value;
                 });
 
-                const data = await response.json();
-                if (!response.ok || !data.success) {
-                    throw new Error(data.error || 'Invalid or expired OTP code.');
+                if (enteredOtp.length < 6) {
+                    alert('Please enter the complete 6-digit verification code.');
+                    return;
                 }
 
-                const userRecordStr = localStorage.getItem('garcos_user_' + attemptingEmail);
-                if (userRecordStr) {
-                    const userRecord = JSON.parse(userRecordStr);
+                try {
+                    const response = await fetch('/.netlify/functions/verify-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: attemptingEmail, otp: enteredOtp })
+                    });
 
-                    if (userRecord.status === 'pending_payment') {
-                        alert('Your previous payment was not completed. Redirecting to complete checkout.');
-                        window.location.href = 'paymentplan.html';
-                        return;
+                    const data = await response.json();
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.error || 'Invalid or expired OTP code.');
                     }
 
-                    if (userRecord.expiresAt && new Date() > new Date(userRecord.expiresAt)) {
-                        userRecord.status = 'expired';
-                        localStorage.setItem('garcos_user_' + attemptingEmail, JSON.stringify(userRecord));
-                        alert('Your 28-day subscription has expired. Please renew.');
-                        window.location.href = 'paymentplan.html';
+                    // ==========================================
+                    // ADMIN LIFETIME FREE ACCESS BYPASS
+                    // ==========================================
+                    const ADMIN_EMAIL = 'genuinerish@gmail.com'; // Replace with your exact email
+
+                    if (attemptingEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                        const adminRecord = {
+                            company: 'Garcos Admin',
+                            email: attemptingEmail,
+                            plan: 'lifetime_admin',
+                            status: 'active',
+                            activatedAt: new Date().toISOString(),
+                            expiresAt: new Date(Date.now() + (365 * 100 * 24 * 60 * 60 * 1000)).toISOString() // 100 years out
+                        };
+                        localStorage.setItem('garcos_user_' + attemptingEmail, JSON.stringify(adminRecord));
+                        localStorage.setItem('garcos_active_session', JSON.stringify(adminRecord));
+                        window.location.href = 'app.html';
                         return;
                     }
+                    // ==========================================
 
-                    localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
-                    alert('Login Successful! Welcome back, ' + userRecord.company);
-                    window.location.href = 'app.html';
-                } else {
-                    alert('Account record not found. Please select a subscription plan first.');
-                    window.location.href = 'paymentplan.html';
+                    const userRecordStr = localStorage.getItem('garcos_user_' + attemptingEmail);
+                    if (userRecordStr) {
+                        const userRecord = JSON.parse(userRecordStr);
+
+                        if (userRecord.status === 'pending_payment') {
+                            alert('Your previous payment was not completed. Redirecting to complete checkout.');
+                            window.location.href = 'paymentplan.html';
+                            return;
+                        }
+
+                        if (userRecord.expiresAt && new Date() > new Date(userRecord.expiresAt)) {
+                            userRecord.status = 'expired';
+                            localStorage.setItem('garcos_user_' + attemptingEmail, JSON.stringify(userRecord));
+                            alert('Your 28-day subscription has expired. Please renew.');
+                            window.location.href = 'paymentplan.html';
+                            return;
+                        }
+
+                        localStorage.setItem('garcos_active_session', JSON.stringify(userRecord));
+                        alert('Login Successful! Welcome back, ' + userRecord.company);
+                        window.location.href = 'app.html';
+                    } else {
+                        alert('Account record not found. Please select a subscription plan first.');
+                        window.location.href = 'paymentplan.html';
+                    }
+
+                } catch (error) {
+                    alert('Verification failed: ' + error.message);
                 }
-
-            } catch (error) {
-                alert('Verification failed: ' + error.message);
             }
-        }
     </script>
 </body>
 
