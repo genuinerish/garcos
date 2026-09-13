@@ -10,9 +10,8 @@ exports.handler = async (event) => {
 
     try {
         const signature = event.headers['x-razorpay-signature'];
-        const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET; // Set this in Netlify env vars
+        const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-        // Optional signature verification for production security
         if (webhookSecret) {
             const expectedSignature = crypto
                 .createHmac('sha256', webhookSecret)
@@ -25,19 +24,33 @@ exports.handler = async (event) => {
         }
 
         const payload = JSON.parse(event.body);
+        const eventType = payload.event;
 
-        // Check if the event is a successful payment
-        if (payload.event === 'payment.captured' || payload.event === 'order.paid') {
+        let email = null;
+        let isPaid = false;
+
+        // Handle Subscription Auto-Pay Events
+        if (eventType === 'subscription.charged') {
+            const subscriptionEntity = payload.payload.subscription.entity;
             const paymentEntity = payload.payload.payment.entity;
-            const email = paymentEntity.notes ? paymentEntity.notes.userEmail : null;
+            email = (subscriptionEntity.notes && subscriptionEntity.notes.email) ||
+                (paymentEntity.notes && paymentEntity.notes.email);
+            isPaid = true;
+        } else if (eventType === 'subscription.halted' || eventType === 'subscription.cancelled' || eventType === 'subscription.completed') {
+            const subscriptionEntity = payload.payload.subscription.entity;
+            email = subscriptionEntity.notes && subscriptionEntity.notes.email;
+            isPaid = false; // Cut off access if auto-pay fails or subscription ends
+        } else if (eventType === 'payment.captured' || eventType === 'order.paid') {
+            const paymentEntity = payload.payload.payment.entity;
+            email = paymentEntity.notes && (paymentEntity.notes.email || paymentEntity.notes.userEmail);
+            isPaid = true;
+        }
 
-            if (email) {
-                // Update user status to paid in Supabase
-                await supabase
-                    .from('users')
-                    .update({ is_paid: true })
-                    .eq('email', email);
-            }
+        if (email) {
+            await supabase
+                .from('users')
+                .update({ is_paid: isPaid })
+                .eq('email', email.toLowerCase());
         }
 
         return { statusCode: 200, body: JSON.stringify({ status: 'ok' }) };
