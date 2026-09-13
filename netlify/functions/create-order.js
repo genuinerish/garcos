@@ -14,37 +14,36 @@ exports.handler = async (event) => {
         const { email, planType } = JSON.parse(event.body);
 
         const planMapping = {
-            basic: { amount: 39900, name: 'Garcos Basic Plan', reference: 'plan_basic_monthly' },
-            premium: { amount: 45900, name: 'Garcos Premium Plan', reference: 'plan_premium_monthly' },
-            pro_quarterly: { amount: 129900, name: 'Garcos Quarterly Plan', reference: 'plan_pro_quarterly' }
+            basic: { name: 'Garcos Basic Plan', reference: 'plan_TbUOSrnylaeScX' },
+            premium: { name: 'Garcos Premium Plan', reference: 'plan_TbUOSrnylaeScX' },
+            pro_quarterly: { name: 'Garcos Quarterly Plan', reference: 'plan_TbUOSrnylaeScX' }
         };
 
         const selectedPlan = planMapping[planType] || planMapping.premium;
 
-        const options = {
-            amount: selectedPlan.amount,
-            currency: "INR",
-            receipt: `rcpt_${Date.now()}_${planType}`,
+        // Create a Razorpay Subscription for automated recurring billing
+        const subscription = await razorpay.subscriptions.create({
+            plan_id: selectedPlan.reference,
+            total_count: 12,
+            customer_notify: 1,
             notes: {
                 email: email,
                 planType: planType,
-                planName: selectedPlan.name,
-                planReference: selectedPlan.reference
-            }
-        };
-
-        const order = await razorpay.orders.create(options);
+                planName: selectedPlan.name
+            },
+            callback_url: 'https://garcos.netlify.app/app.html',
+            redirect: true
+        });
 
         return {
             statusCode: 200,
             body: JSON.stringify({
-                id: order.id,
-                amount: order.amount,
-                currency: order.currency,
-                keyId: process.env.RAZORPAY_KEY_ID
+                subscription_id: subscription.id,
+                short_url: subscription.short_url
             })
         };
     } catch (err) {
-        return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+        console.error('Subscription creation error:', err);
+        return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Failed to create subscription' }) };
     }
 };
