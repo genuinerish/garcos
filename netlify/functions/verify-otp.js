@@ -61,9 +61,14 @@ exports.handler = async (event) => {
 
         const hasActiveAccess = trialActive || !!user.is_paid;
 
+        // Inside your verify-otp.js success block:
         return {
             statusCode: 200,
-            body: JSON.stringify({ success: true, hasActiveAccess, trialActive })
+            body: JSON.stringify({
+                success: true,
+                is_paid: user.is_paid,
+                message: 'Verified successfully'
+            })
         };
     } catch (err) {
         return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
