@@ -288,7 +288,7 @@
             });
         });
 
-      async function verifyAndProceedToPayment() {
+        async function verifyAndProceedToPayment() {
             let enteredOtp = '';
             otpBoxes.forEach(box => { enteredOtp += box.value; });
 
@@ -308,6 +308,7 @@
                 if (!response.ok || !data.success) {
                     throw new Error(data.error || 'Invalid or expired OTP code.');
                 }
+
                 const orderResponse = await fetch('/.netlify/functions/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -319,38 +320,8 @@
                     throw new Error(orderData.error || 'Failed to initialize autopay subscription.');
                 }
 
-                // Redirect to Razorpay Autopay Mandate Link
+                // Redirect directly to Razorpay Hosted Autopay Subscription Mandate Link
                 window.location.href = orderData.short_url;
-                closeCheckoutModal();
-
-                const options = {
-                    key: orderData.key_id,
-                    amount: orderData.amount,
-                    currency: orderData.currency,
-                    name: "Garcos Enterprise Pro",
-                    description: "Pro Suite Subscription (28 Days)",
-                    order_id: orderData.id,
-                   .handler: async function(response) {
-                        try {
-                            // Immediately notify backend to activate user upon successful payment modal callback
-                            await fetch('/.netlify/functions/activate-user', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    email: pendingEmail,
-                                    payment_id: response.razorpay_payment_id,
-                                    order_id: response.razorpay_order_id
-                                })
-                            });
-                        } catch (err) {
-                            console.error('Activation sync error:', err);
-                        }
-                        window.location.href = '/app.html';
-                    }
-                };
-
-                const rzp1 = new Razorpay(options);
-                rzp1.open();
 
             } catch (error) {
                 alert('Verification failed: ' + error.message);
