@@ -9,52 +9,32 @@ exports.handler = async (event) => {
     }
 
     try {
+        const payload = JSON.parse(event.body);
+        console.log("RAZORPAY WEBHOOK PAYLOAD:", JSON.stringify(payload, null, 2));
+
         const signature = event.headers['x-razorpay-signature'];
         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-        if (webhookSecret) {
+        if (webhookSecret && signature) {
             const expectedSignature = crypto
                 .createHmac('sha256', webhookSecret)
                 .update(event.body)
                 .digest('hex');
 
             if (expectedSignature !== signature) {
+                console.error("Invalid webhook signature!");
                 return { statusCode: 400, body: JSON.stringify({ error: 'Invalid webhook signature' }) };
             }
         }
 
-        const payload = JSON.parse(event.body);
         const eventType = payload.event;
+        const paymentEntity = payload.payload?.payment?.entity || payload.payload?.order?.entity;
 
-        let email = null;
-        let phone = null;
-        let isPaid = false;
+        let email = paymentEntity?.notes?.email || paymentEntity?.notes?.userEmail || paymentEntity?.email || paymentEntity?.customer?.email;
+        let phone = paymentEntity?.contact || paymentEntity?.customer?.contact;
+        let isPaid = (eventType === 'payment.captured' || eventType === 'order.paid' || eventType === 'subscription.charged');
 
-        if (eventType === 'subscription.charged') {
-            const subscriptionEntity = payload.payload.subscription.entity;
-            const paymentEntity = payload.payload.payment.entity;
-
-            email = (subscriptionEntity.notes && subscriptionEntity.notes.email) ||
-                (paymentEntity.notes && paymentEntity.notes.email) ||
-                paymentEntity.email;
-
-            phone = paymentEntity.contact || subscriptionEntity.customer_phone || null;
-            isPaid = true;
-        } else if (eventType === 'subscription.halted' || eventType === 'subscription.cancelled' || eventType === 'subscription.completed') {
-            const subscriptionEntity = payload.payload.subscription.entity;
-            email = subscriptionEntity.notes && subscriptionEntity.notes.email;
-            isPaid = false;
-        } else if (eventType === 'payment.captured' || eventType === 'order.paid') {
-            const paymentEntity = payload.payload.payment.entity;
-
-            // Fallback chain: check notes, then direct paymentEntity fields (email / customer_email)
-            email = (paymentEntity.notes && (paymentEntity.notes.email || paymentEntity.notes.userEmail)) ||
-                paymentEntity.email ||
-                paymentEntity.customer_email;
-
-            phone = paymentEntity.contact || null;
-            isPaid = true;
-        }
+        console.log("Extracted -> Email:", email, "Phone:", phone, "IsPaid:", isPaid);
 
         if (email) {
             const updateData = { is_paid: isPaid };
@@ -65,7 +45,7 @@ exports.handler = async (event) => {
 
             if (isPaid) {
                 const now = new Date();
-                const renewalDate = new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000); // Add 28 days
+                const renewalDate = new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000);
 
                 updateData.joined_date = now.toISOString();
                 updateData.renewal_date = renewalDate.toISOString();
@@ -78,7 +58,11 @@ exports.handler = async (event) => {
 
             if (updateError) {
                 console.error('Supabase update error:', updateError);
+            } else {
+                console.log('Successfully updated user in Supabase:', email);
             }
+        } else {
+            console.warn("No email found in webhook payload!");
         }
 
         return { statusCode: 200, body: JSON.stringify({ status: 'ok' }) };
