@@ -35,7 +35,8 @@ exports.handler = async (event) => {
             const paymentEntity = payload.payload.payment.entity;
 
             email = (subscriptionEntity.notes && subscriptionEntity.notes.email) ||
-                (paymentEntity.notes && paymentEntity.notes.email);
+                (paymentEntity.notes && paymentEntity.notes.email) ||
+                paymentEntity.email;
 
             phone = paymentEntity.contact || subscriptionEntity.customer_phone || null;
             isPaid = true;
@@ -45,7 +46,12 @@ exports.handler = async (event) => {
             isPaid = false;
         } else if (eventType === 'payment.captured' || eventType === 'order.paid') {
             const paymentEntity = payload.payload.payment.entity;
-            email = paymentEntity.notes && (paymentEntity.notes.email || paymentEntity.notes.userEmail);
+
+            // Fallback chain: check notes, then direct paymentEntity fields (email / customer_email)
+            email = (paymentEntity.notes && (paymentEntity.notes.email || paymentEntity.notes.userEmail)) ||
+                paymentEntity.email ||
+                paymentEntity.customer_email;
+
             phone = paymentEntity.contact || null;
             isPaid = true;
         }
@@ -65,10 +71,14 @@ exports.handler = async (event) => {
                 updateData.renewal_date = renewalDate.toISOString();
             }
 
-            await supabase
+            const { error: updateError } = await supabase
                 .from('users')
                 .update(updateData)
-                .eq('email', email.toLowerCase());
+                .eq('email', email.toLowerCase().trim());
+
+            if (updateError) {
+                console.error('Supabase update error:', updateError);
+            }
         }
 
         return { statusCode: 200, body: JSON.stringify({ status: 'ok' }) };
