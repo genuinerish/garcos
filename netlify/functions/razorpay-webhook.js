@@ -27,29 +27,47 @@ exports.handler = async (event) => {
         const eventType = payload.event;
 
         let email = null;
+        let phone = null;
         let isPaid = false;
 
-        // Handle Subscription Auto-Pay Events
         if (eventType === 'subscription.charged') {
             const subscriptionEntity = payload.payload.subscription.entity;
             const paymentEntity = payload.payload.payment.entity;
+
             email = (subscriptionEntity.notes && subscriptionEntity.notes.email) ||
                 (paymentEntity.notes && paymentEntity.notes.email);
+
+            phone = paymentEntity.contact || subscriptionEntity.customer_phone || null;
             isPaid = true;
         } else if (eventType === 'subscription.halted' || eventType === 'subscription.cancelled' || eventType === 'subscription.completed') {
             const subscriptionEntity = payload.payload.subscription.entity;
             email = subscriptionEntity.notes && subscriptionEntity.notes.email;
-            isPaid = false; // Cut off access if auto-pay fails or subscription ends
+            isPaid = false;
         } else if (eventType === 'payment.captured' || eventType === 'order.paid') {
             const paymentEntity = payload.payload.payment.entity;
             email = paymentEntity.notes && (paymentEntity.notes.email || paymentEntity.notes.userEmail);
+            phone = paymentEntity.contact || null;
             isPaid = true;
         }
 
         if (email) {
+            const updateData = { is_paid: isPaid };
+
+            if (phone) {
+                updateData.phone = phone;
+            }
+
+            if (isPaid) {
+                const now = new Date();
+                const renewalDate = new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000); // Add 28 days
+
+                updateData.joined_date = now.toISOString();
+                updateData.renewal_date = renewalDate.toISOString();
+            }
+
             await supabase
                 .from('users')
-                .update({ is_paid: isPaid })
+                .update(updateData)
                 .eq('email', email.toLowerCase());
         }
 
