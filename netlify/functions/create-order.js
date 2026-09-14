@@ -13,30 +13,30 @@ exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body || '{}');
         const email = body.email || 'customer@garcos.app';
-        const planType = body.planType || 'pro_quarterly';
+        const planType = body.planType || 'pro_monthly';
 
-        const order = await razorpay.orders.create({
-            amount: 49900, // ₹499 in paise
-            currency: 'INR',
-            receipt: 'rcpt_' + Date.now(),
+        // Use your verified Razorpay Plan ID for Autopay
+        const subscription = await razorpay.subscriptions.create({
+            plan_id: 'plan_TbUOSrnylaeScX',
+            total_count: 12,
+            customer_notify: 1,
             notes: {
                 email: email,
                 planType: planType,
-                planName: 'Garcos Pro Quarterly Plan'
+                planName: 'Garcos Pro Monthly'
             }
         });
 
         return {
             statusCode: 200,
             body: JSON.stringify({
-                id: order.id,
-                amount: order.amount,
-                currency: order.currency,
+                id: subscription.id,
+                short_url: subscription.short_url,
                 key_id: process.env.RAZORPAY_KEY_ID
             })
         };
     } catch (err) {
-        console.error('Order creation error:', err);
-        return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Failed to create order' }) };
+        console.error('Subscription creation error:', err);
+        return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Failed to create subscription' }) };
     }
 };

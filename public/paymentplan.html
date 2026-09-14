@@ -308,18 +308,19 @@
                 if (!response.ok || !data.success) {
                     throw new Error(data.error || 'Invalid or expired OTP code.');
                 }
-
                 const orderResponse = await fetch('/.netlify/functions/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: pendingEmail, planType: 'pro_quarterly' })
+                    body: JSON.stringify({ email: pendingEmail, planType: 'pro_monthly' })
                 });
 
                 const orderData = await orderResponse.json();
-                if (!orderResponse.ok || !orderData.id) {
-                    throw new Error(orderData.error || 'Failed to initialize payment gateway.');
+                if (!orderResponse.ok || !orderData.short_url) {
+                    throw new Error(orderData.error || 'Failed to initialize autopay subscription.');
                 }
 
+                // Redirect to Razorpay Autopay Mandate Link
+                window.location.href = orderData.short_url;
                 closeCheckoutModal();
 
                 const options = {
@@ -329,16 +330,22 @@
                     name: "Garcos Enterprise Pro",
                     description: "Pro Suite Subscription (28 Days)",
                     order_id: orderData.id,
-                    handler: function (response) {
-                        alert('Payment successful! Redirecting to app...');
+                   .handler: async function(response) {
+                        try {
+                            // Immediately notify backend to activate user upon successful payment modal callback
+                            await fetch('/.netlify/functions/activate-user', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    email: pendingEmail,
+                                    payment_id: response.razorpay_payment_id,
+                                    order_id: response.razorpay_order_id
+                                })
+                            });
+                        } catch (err) {
+                            console.error('Activation sync error:', err);
+                        }
                         window.location.href = '/app.html';
-                    },
-                    prefill: {
-                        email: pendingEmail,
-                        company: pendingCompany
-                    },
-                    theme: {
-                        color: "#059669"
                     }
                 };
 
