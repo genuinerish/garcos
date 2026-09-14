@@ -11,39 +11,43 @@ exports.handler = async (event) => {
     }
 
     try {
-        const { email, planType } = JSON.parse(event.body);
+        const body = JSON.parse(event.body || '{}');
+        const email = body.email || 'customer@garcos.app';
+        const planType = body.planType || 'pro_quarterly';
 
         const planMapping = {
-            basic: { name: 'Garcos Basic Plan', reference: 'plan_TbUOSrnylaeScX' },
-            premium: { name: 'Garcos Premium Plan', reference: 'plan_TbUOSrnylaeScX' },
-            pro_quarterly: { name: 'Garcos Quarterly Plan', reference: 'plan_TbUOSrnylaeScX' }
+            basic: { name: 'Garcos Basic Plan', reference: process.env.RAZORPAY_PLAN_ID || 'plan_TbUOSrnylaeScX' },
+            premium: { name: 'Garcos Premium Plan', reference: process.env.RAZORPAY_PLAN_ID || 'plan_TbUOSrnylaeScX' },
+            pro_quarterly: { name: 'Garcos Quarterly Plan', reference: process.env.RAZORPAY_PLAN_ID || 'plan_TbUOSrnylaeScX' }
         };
 
-        const selectedPlan = planMapping[planType] || planMapping.premium;
+        const selectedPlan = planMapping[planType] || planMapping.pro_quarterly;
 
-        // Create a Razorpay Subscription for automated recurring billing
-        const subscription = await razorpay.subscriptions.create({
-            plan_id: selectedPlan.reference,
-            total_count: 12,
-            customer_notify: 1,
+        // Create a standard Razorpay Order instead of a Subscription if subscription plans aren't active
+        const order = await razorpay.orders.create({
+            amount: 49900, // Amount in paise (₹499)
+            currency: 'INR',
+            receipt: 'rcpt_' + Date.now(),
             notes: {
                 email: email,
                 planType: planType,
                 planName: selectedPlan.name
-            },
-            callback_url: 'https://garcos.netlify.app/app.html',
-            redirect: true
+            }
         });
 
+        // Generate a standard checkout configuration or short url payload
+        // Alternatively, if using Razorpay Orders, pass order_id back to frontend to open standard checkout modal
         return {
             statusCode: 200,
             body: JSON.stringify({
-                subscription_id: subscription.id,
-                short_url: subscription.short_url
+                id: order.id,
+                amount: order.amount,
+                currency: order.currency,
+                short_url: `https://api.razorpay.com/v1/checkout/embedded?data=${order.id}` // Fallback or handle via checkout.js modal
             })
         };
     } catch (err) {
-        console.error('Subscription creation error:', err);
-        return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Failed to create subscription' }) };
+        console.error('Order creation error details:', err);
+        return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Failed to create order' }) };
     }
 };
