@@ -15,5 +15,8 @@
     "dotenv": "^17.4.2",
     "nodemailer": "^10.0.1",
     "razorpay": "^2.9.8"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^5.7.0"
   }
 }

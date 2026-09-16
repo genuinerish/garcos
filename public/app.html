@@ -13,54 +13,29 @@
     <!-- HTML2PDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
-        // Disable Ctrl+U, F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+        // Hardened Event Capture to Block Source Inspection Shortcuts
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'F12' ||
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-                (e.ctrlKey && e.key.toLowerCase() === 'u')) {
+            // Block F12
+            if (e.key === 'F12') {
                 e.preventDefault();
-                alert('Source inspection is disabled for protected software logic.');
+                e.stopPropagation();
                 return false;
             }
-        });
 
-        // Disable Right-Click Context Menu
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        });
+            // Block Ctrl+U or Cmd+U (handles rapid pressing and code variations)
+            if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'u' || e.code === 'KeyU')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
 
-        // Check if user session token exists in localStorage
-        window.addEventListener('DOMContentLoaded', () => {
-                const activeSessionStr = localStorage.getItem('garcos_active_session');
-                if (!activeSessionStr) {
-                    alert('No active session found. Please sign in.');
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                const session = JSON.parse(activeSessionStr);
-
-                // Validate 28-day expiry
-                if (session.expiresAt && new Date() > new Date(session.expiresAt)) {
-                    session.status = 'expired';
-                    localStorage.setItem('garcos_user_' + session.email, JSON.stringify(session));
-                    localStorage.removeItem('garcos_active_session');
-                    alert('Your 28-day subscription has expired. Please renew your plan.');
-                    window.location.href = 'paymentplan.html';
-                    return;
-                }
-
-                if (session.status !== 'active') {
-                    alert('Subscription is inactive.');
-                    window.location.href = 'paymentplan.html';
-                    return;
-                }
-
-                document.getElementById('company-display-name').innerText = session.company;
-                document.getElementById('user-email-display').innerText = session.email;
-
-                calculateCosts();
-            });
+            // Block Ctrl+Shift+I, J, C, K
+            if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c', 'k', 'I', 'J', 'C', 'K'].includes(e.key)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true); // Captured during the bubbling/capturing phase for maximum priority
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
