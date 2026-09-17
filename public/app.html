@@ -5,13 +5,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garment Costing Pro - Quotation & Tech Pack Suite</title>
+    <script>
+        // LIVE PRODUCTION MODE: Set to false to enforce absolute URL payment redirection
+        const LOCAL_TESTING_MODE = false;
+
+        // Enforce active subscription session check and redirect to live absolute URL
+        window.addEventListener('DOMContentLoaded', () => {
+            if (LOCAL_TESTING_MODE) {
+                console.warn('Local testing mode active: Payment redirection bypassed.');
+                return;
+            }
+
+            const livePaymentUrl = 'https://garcos.netlify.app/paymentplan.html';
+
+            const activeSessionStr = localStorage.getItem('garcos_active_session');
+            if (!activeSessionStr) {
+                alert('Access restricted: Please complete your subscription payment to unlock the application.');
+                window.location.href = livePaymentUrl;
+                return;
+            }
+
+            try {
+                const session = JSON.parse(activeSessionStr);
+                if (session.status !== 'active' || (session.expiresAt && new Date() > new Date(session.expiresAt))) {
+                    localStorage.removeItem('garcos_active_session');
+                    alert('Your subscription has expired. Please renew your plan on the payment page.');
+                    window.location.href = livePaymentUrl;
+                    return;
+                }
+            } catch (err) {
+                window.location.href = livePaymentUrl;
+            }
+        });
+    </script>
+    <script>
+        // Completely block right-click context menus via capture phase
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('Inspection and context options are disabled.');
+            return false;
+        }, true);
+    </script>
+    <script>
+        // Hardened Event Capture to Block Source Inspection Shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Block F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Block Ctrl+U or Cmd+U (handles rapid pressing and code variations)
+            if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'u' || e.code === 'KeyU')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Block Ctrl+Shift+I, J, C, K
+            if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c', 'k', 'I', 'J', 'C', 'K'].includes(e.key)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true); // Captured during the bubbling/capturing phase for maximum priority
+    </script>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- HTML2PDF Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        // Completely block right-click context menus via capture phase
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+    </script>
     <script>
         // Hardened Event Capture to Block Source Inspection Shortcuts
         document.addEventListener('keydown', function (e) {
@@ -563,6 +637,15 @@
             calculateAllCosting();
             pushUndoState();
             showToast(`Added Part ${newPartIdx} to Garment Set!`);
+
+            setTimeout(() => {
+                const pills = document.querySelectorAll('#garment-parts-pills-container input[type="text"]');
+                if (pills.length > 0) {
+                    const lastPill = pills[pills.length - 1];
+                    lastPill.focus();
+                    lastPill.select();
+                }
+            }, 50);
         }
 
         function removeGarmentPart(partId) {
@@ -645,6 +728,15 @@
             renderExpensesTable();
             calculateAllCosting();
             pushUndoState();
+
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('.embellishment-row .item-name-input');
+                if (inputs.length > 0) {
+                    const lastInp = inputs[inputs.length - 1];
+                    lastInp.focus();
+                    lastInp.select();
+                }
+            }, 50);
         }
 
         function removeEmbellishmentItem(index) {
@@ -663,6 +755,15 @@
             renderExpensesTable();
             calculateAllCosting();
             pushUndoState();
+
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('.trim-row .item-name-input');
+                if (inputs.length > 0) {
+                    const lastInp = inputs[inputs.length - 1];
+                    lastInp.focus();
+                    lastInp.select();
+                }
+            }, 50);
         }
 
         function removeTrimItem(index) {
@@ -681,6 +782,15 @@
             renderExpensesTable();
             calculateAllCosting();
             pushUndoState();
+
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('.logistics-row .item-name-input');
+                if (inputs.length > 0) {
+                    const lastInp = inputs[inputs.length - 1];
+                    lastInp.focus();
+                    lastInp.select();
+                }
+            }, 50);
         }
 
         function removeLogisticsItem(index) {
@@ -1069,6 +1179,19 @@
                   <td class="p-2 border-r text-slate-900 font-black text-sm" id="fob-total">₹0.00</td>
                 </tr>
 
+                <!-- LOGISTICS & TESTING -->
+                <tr class="bg-slate-100 border-y border-slate-300 text-slate-900 font-bold">
+                  <td class="p-1.5 px-3 text-left uppercase text-[11px] tracking-wider" colspan="${totalColumnsCount}">
+                    <div class="flex items-center justify-between">
+                      <span class="text-slate-900 font-black">LOGISTICS, TRANSPORT & TESTING</span>
+                      <button onclick="addLogisticsItem()" title="Add Custom Expense" class="no-print px-1.5 py-0.5 bg-white hover:bg-slate-200 text-slate-800 text-[10px] font-bold rounded border border-slate-300 flex items-center gap-1 transition-all shadow-sm">
+                        <i class="fa-solid fa-plus text-[9px]"></i> Add
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                ${logisticsRowsHTML}
+
                 <!-- REJECTION % (PER PIECE) -->
                 <tr class="bg-amber-50/70">
                   <td class="p-2 text-left font-bold text-amber-950 border-r border-amber-200">
@@ -1094,19 +1217,6 @@
                   ${postRejectionCells}
                   <td class="p-2 border-r border-slate-200 text-slate-900 font-bold" id="post-rejection-total">₹0.00</td>
                 </tr>
-
-                <!-- LOGISTICS & TESTING -->
-                <tr class="bg-slate-100 border-y border-slate-300 text-slate-900 font-bold">
-                  <td class="p-1.5 px-3 text-left uppercase text-[11px] tracking-wider" colspan="${totalColumnsCount}">
-                    <div class="flex items-center justify-between">
-                      <span class="text-slate-900 font-black">LOGISTICS, TRANSPORT & TESTING</span>
-                      <button onclick="addLogisticsItem()" title="Add Custom Expense" class="no-print px-1.5 py-0.5 bg-white hover:bg-slate-200 text-slate-800 text-[10px] font-bold rounded border border-slate-300 flex items-center gap-1 transition-all shadow-sm">
-                        <i class="fa-solid fa-plus text-[9px]"></i> Add
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                ${logisticsRowsHTML}
 
                 <!-- OVERHEAD & PROFIT MARGIN % (PER PIECE) -->
                 <tr class="bg-emerald-50/70 border-y border-emerald-200">
@@ -1385,7 +1495,7 @@
                     partLog += parseFloat(inp.value) || 0;
                 });
 
-                let partDirect = partFabric + partCmt + partEmb + partTrims;
+                let partDirect = partFabric + partCmt + partEmb + partTrims + partLog;
                 setElText(`direct-cost-${part.id}`, formatRupee(partDirect));
                 sumAllDirectCosts += partDirect;
 
@@ -1407,18 +1517,28 @@
                 setElText(`margin-val-${part.id}`, formatRupee(partMargin));
                 sumAllMargins += partMargin;
 
-                let partExFactory = partPostRejection + partMargin + partLog;
+                let partExFactory = partPostRejection + partMargin;
                 setElText(`exfactory-${part.id}`, formatRupee(partExFactory));
                 sumAllExFactory += partExFactory;
 
-                // Per-part commission
+                // Per-part commission calculated as % of Total Buyer Quote (C = A / (1 - rate))
                 const comInp = document.getElementById(`commission-pct-${part.id}`);
                 let partCommissionPct = (comInp && comInp.value !== '') ? (parseFloat(comInp.value) || 0) : 0;
-                let partCommissionVal = partExFactory * (partCommissionPct / 100);
+
+                let partBuyerQuoteLocal = 0;
+                let partCommissionVal = 0;
+
+                if (partCommissionPct > 0 && partCommissionPct < 100) {
+                    partBuyerQuoteLocal = partExFactory / (1 - (partCommissionPct / 100));
+                    partCommissionVal = partBuyerQuoteLocal - partExFactory;
+                } else {
+                    partBuyerQuoteLocal = partExFactory;
+                    partCommissionVal = 0;
+                }
+
                 setElText(`commission-cost-${part.id}`, formatRupee(partCommissionVal));
                 sumAllCommissions += partCommissionVal;
 
-                let partBuyerQuoteLocal = partExFactory + partCommissionVal;
                 let partBuyerQuoteConverted = partBuyerQuoteLocal > 0 ? (partBuyerQuoteLocal / exchangeRate) : 0;
                 setElText(`buyer-quote-${part.id}`, formatForeign(partBuyerQuoteConverted));
             });
@@ -1440,7 +1560,7 @@
                 const inp = document.getElementById(`commission-pct-${p.id}`);
                 return inp && inp.value !== '';
             });
-            setElText('commission-pct-summary', hasCom ? `${sumAllExFactory > 0 ? ((sumAllCommissions / sumAllExFactory) * 100).toFixed(1) : 0}%` : '-');
+            setElText('commission-pct-summary', hasCom ? `${(sumAllExFactory + sumAllCommissions) > 0 ? ((sumAllCommissions / (sumAllExFactory + sumAllCommissions)) * 100).toFixed(1) : 0}%` : '-');
 
             // Total Set Summary Column Values
             setElText('total-set-fabric-cost', formatRupee(sumAllFabricCosts));
@@ -1562,311 +1682,6 @@
                     healthBadge.innerText = 'LOW MARGIN WARNING';
                 }
             }
-        }
-
-        function loadPresetTemplate(templateType) {
-            pushUndoState();
-
-            if (templateType === 'set_loungewear') {
-                appState = {
-                    buyerName: 'COMFORT WEAR CO.',
-                    styleNo: 'SET-2026-CO-ORD',
-                    styleDes: '2-PIECE CO-ORD LOUNGEWEAR SET (CREW SWEATSHIRT + JOGGER PANT)',
-                    fabricComp: '100% COTTON 3-THREAD FRENCH TERRY',
-                    fabricTypeMode: 'knit',
-                    measurementUnit: 'cm',
-                    isSetMode: true,
-                    garmentParts: [
-                        { id: 'part-1', name: 'PART 1: SWEATSHIRT TOP', code: 'P1', color: 'indigo' },
-                        { id: 'part-2', name: 'PART 2: JOGGER TROUSER', code: 'P2', color: 'emerald' }
-                    ],
-                    sizeRange: 'S - XXL',
-                    colour: 'SAGE GREEN / OATMEAL',
-                    qty: '1500',
-                    targetCurrency: 'INR',
-                    exchangeRate: 1.0,
-                    lossPercent: '10',
-                    cmtCosts: { 'part-1': 45, 'part-2': 30 },
-                    partFabricOverrides: {},
-                    partRejections: { 'part-1': '3', 'part-2': '3' },
-                    partMargins: { 'part-1': '14', 'part-2': '12' },
-                    partCommissions: { 'part-1': '0', 'part-2': '0' },
-                    fabricColumns: [
-                        { id: 'fab-0', name: 'FRENCH TERRY BODY', gsm: '280' },
-                        { id: 'fab-1', name: '2X2 COTTON RIB', gsm: '360' }
-                    ],
-                    processList: [
-                        { name: 'YARN', costs: { 'fab-0': 410, 'fab-1': 410 } },
-                        { name: 'KNITTING', costs: { 'fab-0': 16, 'fab-1': 16 } },
-                        { name: 'DYEING & WASH', costs: { 'fab-0': 60, 'fab-1': 60 } },
-                        { name: 'COMPACTING', costs: { 'fab-0': 10, 'fab-1': 10 } }
-                    ],
-                    embellishmentsList: [
-                        { name: 'CHEST EMBROIDERY (TOP)', costs: { 'part-1': 22, 'part-2': 0 } },
-                        { name: 'LEG PRINT (PANT)', costs: { 'part-1': 0, 'part-2': 18 } }
-                    ],
-                    trimsList: [
-                        { name: 'SEWING THREAD', costs: { 'part-1': 4, 'part-2': 4 } },
-                        { name: 'WAISTBAND ELASTIC & DRAWCORD', costs: { 'part-1': 0, 'part-2': 14 } },
-                        { name: 'WOVEN LABELS & TAGS', costs: { 'part-1': 5, 'part-2': 4 } },
-                        { name: 'SET POLY BAG & CARTON', costs: { 'part-1': 3, 'part-2': 3 } }
-                    ],
-                    logisticsList: [
-                        { name: 'LOCAL TRANSPORT & TESTING', costs: { 'part-1': 3.5, 'part-2': 3.5 } }
-                    ],
-                    measurementSections: [
-                        {
-                            id: 'm-card-1',
-                            title: 'TOP BODY & SLEEVES',
-                            fabricId: 'fab-0',
-                            partId: 'part-1',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'BODY LENGTH', mmt: 72, allow: 4 },
-                                { label: 'CHEST WIDTH', mmt: 56, allow: 12 },
-                                { label: 'SLEEVE LENGTH', mmt: 64, allow: 4 }
-                            ]
-                        },
-                        {
-                            id: 'm-card-2',
-                            title: 'TOP NECK & CUFF RIB',
-                            fabricId: 'fab-1',
-                            partId: 'part-1',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'RIB HEIGHT', mmt: 5, allow: 1 },
-                                { label: 'RIB WIDTH', mmt: 42, allow: 6 }
-                            ]
-                        },
-                        {
-                            id: 'm-card-3',
-                            title: 'JOGGER PANELS',
-                            fabricId: 'fab-0',
-                            partId: 'part-2',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'OUTSEAM LENGTH', mmt: 102, allow: 5 },
-                                { label: '1/2 HIP WIDTH', mmt: 54, allow: 10 }
-                            ]
-                        },
-                        {
-                            id: 'm-card-4',
-                            title: 'JOGGER WAISTBAND & CUFF RIB',
-                            fabricId: 'fab-1',
-                            partId: 'part-2',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'WAIST RIB HEIGHT', mmt: 8, allow: 2 },
-                                { label: 'WAIST CIRCUMFERENCE', mmt: 44, allow: 8 }
-                            ]
-                        }
-                    ]
-                };
-            } else if (templateType === 'tshirt') {
-                appState = {
-                    buyerName: 'PRESET BUYER - URBAN TEE',
-                    styleNo: 'TEE-2026-S1',
-                    styleDes: 'ROUND NECK HALF SLEEVES TEE',
-                    fabricComp: '100% COTTON SINGLE JERSEY',
-                    fabricTypeMode: 'knit',
-                    measurementUnit: 'cm',
-                    isSetMode: false,
-                    garmentParts: [
-                        { id: 'part-1', name: 'PART 1: MAIN GARMENT', code: 'P1', color: 'indigo' }
-                    ],
-                    sizeRange: 'S - XXL',
-                    colour: 'NAVY BLUE',
-                    qty: '1000',
-                    targetCurrency: 'INR',
-                    exchangeRate: 1.0,
-                    lossPercent: '10',
-                    cmtCosts: { 'part-1': 22 },
-                    partFabricOverrides: {},
-                    partRejections: { 'part-1': '3' },
-                    partMargins: { 'part-1': '12' },
-                    partCommissions: { 'part-1': '0' },
-                    fabricColumns: [
-                        { id: 'fab-0', name: '100% COTTON S/J', gsm: '180' },
-                        { id: 'fab-1', name: '1X1 COTTON RIB', gsm: '240' }
-                    ],
-                    processList: [
-                        { name: 'YARN', costs: { 'fab-0': 380, 'fab-1': 380 } },
-                        { name: 'KNITTING', costs: { 'fab-0': 12, 'fab-1': 12 } },
-                        { name: 'DYEING', costs: { 'fab-0': 50, 'fab-1': 50 } },
-                        { name: 'COMPACTING', costs: { 'fab-0': 8, 'fab-1': 8 } }
-                    ],
-                    embellishmentsList: [
-                        { name: 'CHEST PRINT', costs: { 'part-1': 18 } }
-                    ],
-                    trimsList: [
-                        { name: 'SEWING THREAD', costs: { 'part-1': 3.00 } },
-                        { name: 'HANG TAG', costs: { 'part-1': 2.00 } },
-                        { name: 'POLY BAG', costs: { 'part-1': 1.00 } },
-                        { name: 'MAIN LABEL', costs: { 'part-1': 2.00 } }
-                    ],
-                    logisticsList: [
-                        { name: 'LOCAL TRANSPORT', costs: { 'part-1': 3.00 } }
-                    ],
-                    measurementSections: [
-                        {
-                            id: 'm-card-1',
-                            title: 'BODY (100% COTTON S/J)',
-                            fabricId: 'fab-0',
-                            partId: 'part-1',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'BODY LENGTH', mmt: 70, allow: 3 },
-                                { label: 'BODY WIDTH', mmt: 52, allow: 11.6 },
-                                { label: 'SLEEVE LENGTH', mmt: 22, allow: 2 }
-                            ]
-                        },
-                        {
-                            id: 'm-card-2',
-                            title: 'NECK RIB (1X1 RIB)',
-                            fabricId: 'fab-1',
-                            partId: 'part-1',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'RIB HEIGHT', mmt: 3.8, allow: 1 },
-                                { label: 'NECK CIRCUMFERENCE', mmt: 44, allow: 13.8 }
-                            ]
-                        }
-                    ]
-                };
-            } else if (templateType === 'hoodie') {
-                appState = {
-                    buyerName: 'WINTER ATHLETICS INC',
-                    styleNo: 'HD-2026-W3',
-                    styleDes: 'FLEECE HOODED SWEATSHIRT',
-                    fabricComp: '80% COTTON 20% POLY FLEECE',
-                    fabricTypeMode: 'knit',
-                    measurementUnit: 'cm',
-                    isSetMode: false,
-                    garmentParts: [
-                        { id: 'part-1', name: 'PART 1: MAIN GARMENT', code: 'P1', color: 'indigo' }
-                    ],
-                    sizeRange: 'M - XXXL',
-                    colour: 'HEATHER GREY',
-                    qty: '500',
-                    targetCurrency: 'INR',
-                    exchangeRate: 1.0,
-                    lossPercent: '10',
-                    cmtCosts: { 'part-1': 65 },
-                    partFabricOverrides: {},
-                    partRejections: { 'part-1': '3' },
-                    partMargins: { 'part-1': '15' },
-                    partCommissions: { 'part-1': '2' },
-                    fabricColumns: [
-                        { id: 'fab-0', name: '3-THREAD FLEECE', gsm: '320' },
-                        { id: 'fab-1', name: '2X2 RIB', gsm: '380' }
-                    ],
-                    processList: [
-                        { name: 'YARN', costs: { 'fab-0': 420, 'fab-1': 420 } },
-                        { name: 'KNITTING', costs: { 'fab-0': 18, 'fab-1': 18 } },
-                        { name: 'DYEING', costs: { 'fab-0': 65, 'fab-1': 65 } },
-                        { name: 'BRUSHING/RAISING', costs: { 'fab-0': 25, 'fab-1': 0 } }
-                    ],
-                    embellishmentsList: [
-                        { name: 'CHEST EMBROIDERY', costs: { 'part-1': 35 } },
-                        { name: 'HOOD PRINT', costs: { 'part-1': 15 } }
-                    ],
-                    trimsList: [
-                        { name: 'HOOD DRAWCORD & EYELETS', costs: { 'part-1': 12.00 } },
-                        { name: 'SEWING THREAD', costs: { 'part-1': 5.00 } },
-                        { name: 'BRAND LABELS & TAGS', costs: { 'part-1': 8.00 } },
-                        { name: 'POLY BAG & CARTON', costs: { 'part-1': 4.00 } }
-                    ],
-                    logisticsList: [
-                        { name: 'LOCAL TRANSPORT & TESTING', costs: { 'part-1': 6.00 } }
-                    ],
-                    measurementSections: [
-                        {
-                            id: 'm-card-1',
-                            title: 'HOODIE BODY & SLEEVES',
-                            fabricId: 'fab-0',
-                            partId: 'part-1',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'BODY LENGTH', mmt: 74, allow: 4 },
-                                { label: 'CHEST WIDTH', mmt: 58, allow: 12 },
-                                { label: 'SLEEVE LENGTH', mmt: 65, allow: 4 }
-                            ]
-                        },
-                        {
-                            id: 'm-card-2',
-                            title: 'CUFFS & BOTTOM RIB',
-                            fabricId: 'fab-1',
-                            partId: 'part-1',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'BOTTOM RIB HEIGHT', mmt: 7, allow: 2 },
-                                { label: 'WAIST WIDTH', mmt: 48, allow: 10 }
-                            ]
-                        }
-                    ]
-                };
-            } else if (templateType === 'polo') {
-                appState = {
-                    buyerName: 'GLOBAL GOLFWEAR',
-                    styleNo: 'POLO-2026-X',
-                    styleDes: 'CLASSIC PIQUE POLO SHIRT WITH COLLAR',
-                    fabricComp: '100% COMBED COTTON PIQUE',
-                    fabricTypeMode: 'knit',
-                    measurementUnit: 'cm',
-                    isSetMode: false,
-                    garmentParts: [
-                        { id: 'part-1', name: 'PART 1: MAIN GARMENT', code: 'P1', color: 'indigo' }
-                    ],
-                    sizeRange: 'S - XXL',
-                    colour: 'WHITE / BLACK',
-                    qty: '1200',
-                    targetCurrency: 'INR',
-                    exchangeRate: 1.0,
-                    lossPercent: '10',
-                    cmtCosts: { 'part-1': 38 },
-                    partFabricOverrides: {},
-                    partRejections: { 'part-1': '3' },
-                    partMargins: { 'part-1': '14' },
-                    partCommissions: { 'part-1': '0' },
-                    fabricColumns: [
-                        { id: 'fab-0', name: 'COTTON PIQUE', gsm: '220' },
-                        { id: 'fab-1', name: 'FLAT KNIT COLLAR', gsm: '260' }
-                    ],
-                    processList: [
-                        { name: 'YARN', costs: { 'fab-0': 410, 'fab-1': 410 } },
-                        { name: 'KNITTING', costs: { 'fab-0': 20, 'fab-1': 20 } },
-                        { name: 'DYEING', costs: { 'fab-0': 55, 'fab-1': 55 } }
-                    ],
-                    embellishmentsList: [
-                        { name: 'CHEST LOGO EMBROIDERY', costs: { 'part-1': 22 } }
-                    ],
-                    trimsList: [
-                        { name: 'ENGRAVED BUTTONS (3 PCS)', costs: { 'part-1': 4.50 } },
-                        { name: 'SEWING THREAD', costs: { 'part-1': 3.50 } },
-                        { name: 'WOVEN LABELS & TAGS', costs: { 'part-1': 5.00 } }
-                    ],
-                    logisticsList: [
-                        { name: 'LOCAL TRANSPORT', costs: { 'part-1': 3.50 } }
-                    ],
-                    measurementSections: [
-                        {
-                            id: 'm-card-1',
-                            title: 'POLO BODY PANELS',
-                            fabricId: 'fab-0',
-                            partId: 'part-1',
-                            multiplier: 2,
-                            rows: [
-                                { label: 'BODY LENGTH', mmt: 72, allow: 3 },
-                                { label: 'CHEST WIDTH', mmt: 54, allow: 10 }
-                            ]
-                        }
-                    ]
-                };
-            }
-
-            restoreUIFromState();
-            pushUndoState();
-            showToast(`Loaded ${templateType.toUpperCase()} preset template!`);
         }
 
         function handleUnitToggle() {
@@ -2084,6 +1899,15 @@
             renderFabricationTable();
             calculateAllCosting();
             pushUndoState();
+
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('#fabrication-table-wrapper .process-row input.proc-title-input');
+                if (inputs.length > insertIdx) {
+                    const targetInp = inputs[insertIdx];
+                    targetInp.focus();
+                    targetInp.select();
+                }
+            }, 50);
         }
 
         function addFabricColumn() {
@@ -2107,6 +1931,15 @@
             updateFabricDropdowns();
             calculateAllCosting();
             pushUndoState();
+
+            setTimeout(() => {
+                const colIdx = appState.fabricColumns.length - 1;
+                const titleInput = document.getElementById(`fab-title-${colIdx}`);
+                if (titleInput) {
+                    titleInput.focus();
+                    titleInput.select();
+                }
+            }, 50);
         }
 
         function removeFabricColumn(index) {
@@ -2223,31 +2056,47 @@
 
             let targetRow = null;
             let tbody = null;
+            let targetCard = null;
 
             if (typeof targetRef === 'string') {
-                const card = document.getElementById(targetRef);
-                if (!card) return;
-                tbody = card.querySelector('tbody');
+                targetCard = document.getElementById(targetRef);
+                if (!targetCard) return;
+                tbody = targetCard.querySelector('tbody');
             } else if (targetRef && targetRef.closest) {
                 targetRow = targetRef.closest('tr');
                 tbody = targetRow ? targetRow.closest('tbody') : null;
+                targetCard = targetRow ? targetRow.closest('.measurement-card') : null;
             }
 
             const newRowHTML = createMeasurementRowHTML({ label: 'NEW MEASUREMENT', mmt: '', allow: '' });
 
+            let insertedRow = null;
             if (targetRow) {
                 targetRow.insertAdjacentHTML('afterend', newRowHTML);
+                insertedRow = targetRow.nextElementSibling;
             } else if (tbody) {
                 const totalRow = tbody.querySelector('.section-total-row');
                 if (totalRow) {
                     totalRow.insertAdjacentHTML('beforebegin', newRowHTML);
+                    insertedRow = totalRow.previousElementSibling;
                 } else {
                     tbody.insertAdjacentHTML('beforeend', newRowHTML);
+                    insertedRow = tbody.lastElementChild;
                 }
             }
 
             calculateAllCosting();
             pushUndoState();
+
+            if (insertedRow) {
+                setTimeout(() => {
+                    const labelInput = insertedRow.querySelector('.label-input');
+                    if (labelInput) {
+                        labelInput.focus();
+                        labelInput.select();
+                    }
+                }, 50);
+            }
         }
 
         function removeMeasurementRow(btn) {
@@ -2348,6 +2197,17 @@
             ], defaultFabric, defaultPart, 2);
             calculateAllCosting();
             pushUndoState();
+
+            setTimeout(() => {
+                const addedCard = document.getElementById(cardId);
+                if (addedCard) {
+                    const titleInput = addedCard.querySelector('.section-title-input');
+                    if (titleInput) {
+                        titleInput.focus();
+                        titleInput.select();
+                    }
+                }
+            }, 50);
         }
 
         function removeMeasurementCard(cardId) {
@@ -2392,14 +2252,9 @@
             if (btn) btn.classList.add('hidden');
         }
 
-        /**
-         * CLEAR ALL DATA & ERASE ALL ADDED VALUES COMPLETELY
-         * Wipes all inputs, costs, percentages, GSMs, and measurements back to a clean state.
-         */
         function clearAllData() {
             pushUndoState();
 
-            // 1. Reset baseline state without residual numbers or defaults
             appState = {
                 buyerName: '',
                 styleNo: '',
@@ -2460,7 +2315,6 @@
                 measurementSections: []
             };
 
-            // 2. Reset exchange rate input and remove user-edited cache
             const rateInput = document.getElementById('exchange-rate');
             if (rateInput) {
                 delete rateInput.dataset.userEdited;
@@ -2468,139 +2322,34 @@
                 rateInput.value = '1.0';
             }
 
-            // 3. Clear any manual fabric cost override flags in DOM
             document.querySelectorAll('[data-manual]').forEach(el => {
                 delete el.dataset.manual;
             });
 
-            // 4. Remove preview image
             removeGarmentImage();
-
-            // 5. Re-render UI components from empty state
             restoreUIFromState();
-
-            // 6. Reset measurement sections to blank inputs
             initDefaultMeasurementSections();
 
-            // 7. Explicit sweep of all number input fields in the tables to ensure complete erasure
             document.querySelectorAll('#expenses-table-wrapper input[type="number"], #fabrication-table-wrapper input[type="number"]').forEach(input => {
                 input.value = '';
             });
 
-            // 8. Re-calculate totals and record undo state
             calculateAllCosting();
             pushUndoState();
             showToast('All Manufacturing Costing and Quote values have been completely cleared!');
         }
 
-        function toggleDownloadDropdown() {
-            const menu = document.getElementById('download-menu');
-            if (menu) {
-                menu.classList.toggle('hidden');
-            }
+        // Trigger native browser print dialog (Ctrl+P behavior)
+        function triggerPrintDialog() {
+            window.print();
         }
 
-        function togglePresetDropdown() {
-            const menu = document.getElementById('preset-menu');
-            if (menu) {
-                menu.classList.toggle('hidden');
-            }
-        }
-
-        function downloadCostingPDF(mode) {
-            const menu = document.getElementById('download-menu');
-            if (menu) menu.classList.add('hidden');
-
-            const buyerInput = document.getElementById('buyer-name');
-            const styleInput = document.getElementById('style-no');
-            const buyer = buyerInput ? (buyerInput.value.replace(/[^a-zA-Z0-9]/g, '_') || 'Garment') : 'Garment';
-            const style = styleInput ? (styleInput.value.replace(/[^a-zA-Z0-9]/g, '_') || 'Costing') : 'Costing';
-            const element = document.getElementById('pdf-container');
-
-            const breakdownSection = document.getElementById('costing-breakdown-section');
-            const leftCol = document.getElementById('left-costing-col');
-            const rightCol = document.getElementById('right-costing-col');
-
-            const origBreakdownDisplay = breakdownSection ? breakdownSection.style.display : '';
-            const origRightColDisplay = rightCol ? rightCol.style.display : '';
-            const origLeftColClass = leftCol ? leftCol.className : '';
-
-            document.querySelectorAll('input').forEach(input => {
-                input.setAttribute('value', input.value);
-            });
-            document.querySelectorAll('select').forEach(select => {
-                const selectedOpt = select.options[select.selectedIndex];
-                if (selectedOpt) {
-                    Array.from(select.options).forEach(opt => opt.removeAttribute('selected'));
-                    selectedOpt.setAttribute('selected', 'selected');
-                }
-            });
-
-            let filenamePrefix = 'CostSheet';
-            if (mode === 'closed') {
-                filenamePrefix = 'Closed_Costing';
-                if (breakdownSection) breakdownSection.style.display = 'none';
-            }
-
-            const originalWidth = element.style.width;
-            element.style.width = '1200px';
-
-            showToast('Generating PDF Document...');
-
-            const pdfOpt = {
-                margin: [0.2, 0.2, 0.2, 0.2],
-                filename: `${filenamePrefix}_${buyer}_${style}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, windowWidth: 1200 },
-                jsPDF: { unit: 'in', format: 'a3', orientation: 'landscape' }
-            };
-
-            try {
-                html2pdf().set(pdfOpt).from(element).save().then(() => {
-                    element.style.width = originalWidth;
-                    if (breakdownSection) breakdownSection.style.display = origBreakdownDisplay;
-                    if (rightCol) rightCol.style.display = origRightColDisplay;
-                    if (leftCol) leftCol.className = origLeftColClass;
-                    showToast('PDF Exported successfully!');
-                }).catch(err => {
-                    console.error('Error generating PDF:', err);
-                    element.style.width = originalWidth;
-                    if (breakdownSection) breakdownSection.style.display = origBreakdownDisplay;
-                    if (rightCol) rightCol.style.display = origRightColDisplay;
-                    if (leftCol) leftCol.className = origLeftColClass;
-                    showToast('PDF Export failed. Please try again.');
-                });
-            } catch (e) {
-                element.style.width = originalWidth;
-                if (breakdownSection) breakdownSection.style.display = origBreakdownDisplay;
-                if (rightCol) rightCol.style.display = origRightColDisplay;
-                if (leftCol) leftCol.className = origLeftColClass;
-            }
-        }
-
-        // Prevent accidental number modification on scroll
         document.addEventListener('wheel', function (e) {
             if (document.activeElement && document.activeElement.type === 'number') {
                 document.activeElement.blur();
             }
         }, { passive: true });
 
-        // Close menus on outside click
-        document.addEventListener('click', function (e) {
-            const menu = document.getElementById('download-menu');
-            const btn = document.getElementById('download-dropdown-btn');
-            if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-
-            const pMenu = document.getElementById('preset-menu');
-            const pBtn = document.getElementById('preset-dropdown-btn');
-            if (pMenu && pBtn && !pBtn.contains(e.target) && !pMenu.contains(e.target)) {
-                pMenu.classList.add('hidden');
-            }
-        });
-
-        // Keyboard Navigation: Enter Navigation across rows & shortcuts
         document.addEventListener('keydown', function (e) {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
                 if (e.shiftKey) {
@@ -2620,7 +2369,6 @@
                 const active = document.activeElement;
                 if (!active || active.tagName !== 'INPUT') return;
 
-                // 1. Sequential Flow for Garment Component Measurements: MMT -> ALLOW -> Next Row MMT
                 const currentWeightRow = active.closest('.weight-row');
                 if (currentWeightRow) {
                     e.preventDefault();
@@ -2698,7 +2446,6 @@
                     }
                 }
 
-                // 2. Vertical Column Navigation for Fabrication & Expenses tables
                 const currentTd = active.closest('td');
                 const currentTr = active.closest('tr');
                 const currentTable = active.closest('table');
@@ -2744,7 +2491,6 @@
                     }
                 }
 
-                // 3. General Form Input Navigation
                 const allInputs = Array.from(document.querySelectorAll('input:not([type="file"]):not([type="hidden"]):not([disabled])'));
                 const curIdx = allInputs.indexOf(active);
                 if (curIdx !== -1) {
@@ -2809,14 +2555,11 @@
         <header
             class="bg-slate-900 text-white p-4 rounded-xl shadow-lg border border-slate-800 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="bg-emerald-500/20 text-emerald-400 p-2.5 rounded-lg border border-emerald-500/30">
-                    <i class="fa-solid fa-calculator text-2xl"></i>
-                </div>
                 <div class="flex items-center gap-2">
-                    <div class="bg-emerald-600 text-white p-2 rounded-xl shadow-md">
-                        <i class="fa-solid fa-shirt text-lg"></i>
-                    </div>
-                    <span class="text-lg font-black text-emerald-950 tracking-tight">Fashmar Pro</span>
+                    <span
+                        class="text-xl font-black tracking-wider text-white uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                        GARCOS PRO
+                    </span>
                 </div>
             </div>
 
@@ -2833,35 +2576,6 @@
                 </button>
 
                 <div class="h-5 w-px bg-slate-700 mx-1"></div>
-
-                <!-- Presets Dropdown -->
-                <div class="relative inline-block text-left">
-                    <button id="preset-dropdown-btn" onclick="togglePresetDropdown()"
-                        class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5">
-                        <i class="fa-solid fa-shirt"></i> Garment Presets <i
-                            class="fa-solid fa-chevron-down text-[10px]"></i>
-                    </button>
-                    <div id="preset-menu"
-                        class="hidden absolute right-0 mt-2 w-64 bg-slate-800 text-white rounded-xl shadow-2xl border border-slate-700 py-1 z-50">
-                        <button onclick="loadPresetTemplate('set_loungewear'); togglePresetDropdown();"
-                            class="w-full text-left px-3.5 py-2 hover:bg-slate-700 text-xs font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-layer-group text-purple-400"></i> 2-Pc Co-Ord Set (Top + Jogger)
-                        </button>
-                        <div class="border-t border-slate-700 my-1"></div>
-                        <button onclick="loadPresetTemplate('tshirt'); togglePresetDropdown();"
-                            class="w-full text-left px-3.5 py-2 hover:bg-slate-700 text-xs font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-shirt text-emerald-400"></i> Basic T-Shirt (S/J + Rib)
-                        </button>
-                        <button onclick="loadPresetTemplate('hoodie'); togglePresetDropdown();"
-                            class="w-full text-left px-3.5 py-2 hover:bg-slate-700 text-xs font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-vest text-amber-400"></i> Fleece Hoodie / Sweatshirt
-                        </button>
-                        <button onclick="loadPresetTemplate('polo'); togglePresetDropdown();"
-                            class="w-full text-left px-3.5 py-2 hover:bg-slate-700 text-xs font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-user-tie text-blue-400"></i> Golf Pique Polo Shirt
-                        </button>
-                    </div>
-                </div>
 
                 <button onclick="saveQuotationToLocal()" title="Save Quote (Ctrl+S)"
                     class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5">
@@ -2889,40 +2603,11 @@
                     <i class="fa-solid fa-rotate-left text-[11px]"></i> Reset
                 </button>
 
-                <!-- Download PDF Dropdown -->
-                <div class="relative inline-block text-left no-print">
-                    <button id="download-dropdown-btn" onclick="toggleDownloadDropdown()"
-                        class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5">
-                        <i class="fa-solid fa-file-pdf"></i> Download PDF <i
-                            class="fa-solid fa-chevron-down text-[10px] ml-0.5"></i>
-                    </button>
-                    <div id="download-menu"
-                        class="hidden absolute right-0 mt-2 w-64 bg-slate-800 text-white rounded-xl shadow-2xl border border-slate-700 py-2 z-50">
-                        <button onclick="downloadCostingPDF('full')"
-                            class="w-full text-left px-3.5 py-2 hover:bg-slate-700/80 transition-colors flex items-center gap-2.5">
-                            <div class="p-1.5 bg-indigo-500/20 text-indigo-400 rounded-lg">
-                                <i class="fa-solid fa-file-lines text-xs"></i>
-                            </div>
-                            <div>
-                                <div class="font-extrabold text-xs text-white">Full Cost Sheet PDF</div>
-                                <div class="text-[10px] text-slate-400 leading-tight">Complete specifications, processes
-                                    & measurements</div>
-                            </div>
-                        </button>
-                        <div class="border-t border-slate-700 my-1"></div>
-                        <button onclick="downloadCostingPDF('closed')"
-                            class="w-full text-left px-3.5 py-2 hover:bg-slate-700/80 transition-colors flex items-center gap-2.5">
-                            <div class="p-1.5 bg-rose-500/20 text-rose-400 rounded-lg">
-                                <i class="fa-solid fa-lock text-xs"></i>
-                            </div>
-                            <div>
-                                <div class="font-extrabold text-xs text-white">Closed Costing PDF</div>
-                                <div class="text-[10px] text-slate-400 leading-tight">Shows style spec & buyer details
-                                    only (Hides cost breakdown)</div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+                <!-- Download PDF / Print Button (Triggers Ctrl+P dialog) -->
+                <button onclick="triggerPrintDialog()" title="Download PDF / Print (Ctrl+P)"
+                    class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg transition-all shadow-sm flex items-center gap-1.5 no-print">
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                </button>
             </div>
         </header>
 
