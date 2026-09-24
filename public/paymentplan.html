@@ -209,8 +209,12 @@
         async function handleDetailsSubmit(e) {
             e.preventDefault();
             pendingCompany = document.getElementById('input-company').value.trim();
+<<<<<<< HEAD
             // Force lowercase to avoid case-sensitivity issues
             pendingEmail = document.getElementById('input-email').value.trim().toLowerCase();
+=======
+            pendingEmail = document.getElementById('input-email').value.trim();
+>>>>>>> 9e33ae93a05ce19c43d912396d08e738cf9a1193
 
             if (!pendingCompany || !pendingEmail || !pendingEmail.includes('@')) {
                 alert('Please enter a valid company name and corporate email address.');

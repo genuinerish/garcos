@@ -144,8 +144,12 @@
 
         async function handleEmailSubmit(e) {
             e.preventDefault();
+<<<<<<< HEAD
             // Force lowercase to prevent case sensitivity issues
             attemptingEmail = document.getElementById('login-email-input').value.trim().toLowerCase();
+=======
+            attemptingEmail = document.getElementById('login-email-input').value.trim();
+>>>>>>> 9e33ae93a05ce19c43d912396d08e738cf9a1193
 
             if (!attemptingEmail || !attemptingEmail.includes('@')) {
                 alert('Please enter a valid corporate email address.');
@@ -265,7 +269,11 @@
                 // ==========================================
                 const ADMIN_EMAIL = 'genuinerish@gmail.com';
 
+<<<<<<< HEAD
                 if (attemptingEmail === ADMIN_EMAIL.toLowerCase()) {
+=======
+                if (attemptingEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+>>>>>>> 9e33ae93a05ce19c43d912396d08e738cf9a1193
                     const adminRecord = {
                         company: 'Garcos Admin',
                         email: attemptingEmail,
