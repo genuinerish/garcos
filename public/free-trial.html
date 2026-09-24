@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>28-Day Free Trial Portal - Garcos Pro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <!-- Navbar -->
+    <header class="bg-white/80 backdrop-blur-md text-slate-900 py-4 px-6 sticky top-0 z-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="text-base font-black tracking-wider uppercase text-slate-900">Garcos Pro</a>
+            <a href="index.html"
+                class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors">
+                <i class="fa-solid fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Trial Container -->
+    <main class="flex-grow flex items-center justify-center py-16 px-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-8 max-w-md w-full shadow-sm space-y-6">
+            <div class="text-center space-y-2">
+                <div
+                    class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
+                    <i class="fa-solid fa-gift text-emerald-600"></i> 28-Day Risk-Free Trial
+                </div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Free Trial Portal</h1>
+                <p class="text-xs text-slate-500">Choose an option below to register or access your trial workspace.</p>
+            </div>
+
+            <!-- Mode Selection Tabs -->
+            <div id="mode-selector" class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl">
+                <button type="button" onclick="switchMode('register')" id="tab-register"
+                    class="py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all bg-emerald-600 text-white shadow-sm">
+                    Register For Free
+                </button>
+                <button type="button" onclick="switchMode('login')" id="tab-login"
+                    class="py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all text-slate-600 hover:text-slate-900">
+                    Use Free Trial
+                </button>
+            </div>
+
+            <!-- ================= REGISTER FORM ================= -->
+            <div id="section-register" class="space-y-4">
+                <form id="register-email-form" onsubmit="handleRegisterEmailSubmit(event)" class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700">Corporate Email Address</label>
+                        <input type="email" id="register-email-input" required placeholder="name@company.com"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
+                    </div>
+                    <button type="submit" id="register-send-btn"
+                        class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-sm">
+                        Send Registration OTP
+                    </button>
+                </form>
+
+                <!-- Register OTP Step -->
+                <div id="register-step-otp" class="space-y-5 hidden">
+                    <div
+                        class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-[11px] text-emerald-800 font-medium text-center">
+                        OTP sent to <span id="register-displayed-email" class="font-bold underline"></span>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-700 text-center">Enter 6-Digit Verification
+                            Code</label>
+                        <div class="flex justify-center gap-2 sm:gap-3" id="register-otp-container">
+                            <input type="text" maxlength="1"
+                                class="reg-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="reg-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="reg-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="reg-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="reg-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="reg-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                        </div>
+                    </div>
+                    <button onclick="verifyAndRegisterUser()"
+                        class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-lg shadow-emerald-600/30">
+                        Verify & Complete Registration
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= LOGIN / USE FREE TRIAL FORM ================= -->
+            <div id="section-login" class="space-y-4 hidden">
+                <form id="login-email-form" onsubmit="handleLoginEmailSubmit(event)" class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700">Corporate Email Address</label>
+                        <input type="email" id="login-email-input" required placeholder="name@company.com"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all">
+                    </div>
+                    <button type="submit" id="login-send-btn"
+                        class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-sm">
+                        Send Trial Login OTP
+                    </button>
+                </form>
+
+                <!-- Login OTP Step -->
+                <div id="login-step-otp" class="space-y-5 hidden">
+                    <div
+                        class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-[11px] text-emerald-800 font-medium text-center">
+                        OTP sent to <span id="login-displayed-email" class="font-bold underline"></span>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-700 text-center">Enter 6-Digit Verification
+                            Code</label>
+                        <div class="flex justify-center gap-2 sm:gap-3" id="login-otp-container">
+                            <input type="text" maxlength="1"
+                                class="log-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="log-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="log-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="log-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="log-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" maxlength="1"
+                                class="log-otp-box w-11 h-12 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                                inputmode="numeric" pattern="[0-9]*">
+                        </div>
+                    </div>
+                    <button onclick="verifyTrialLoginAndRoute()"
+                        class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-lg shadow-emerald-600/30">
+                        Verify & Access Trial
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white text-slate-500 py-8 px-6 text-center text-xs border-t border-slate-200">
+        <p>© 2026 Garcos Enterprise Pro · A Sub-Brand Product of Fashmer</p>
+    </footer>
+
+    <script>
+        let targetEmail = '';
+
+        function switchMode(mode) {
+            const regSec = document.getElementById('section-register');
+            const logSec = document.getElementById('section-login');
+            const tabReg = document.getElementById('tab-register');
+            const tabLog = document.getElementById('tab-login');
+
+            if (mode === 'register') {
+                regSec.classList.remove('hidden');
+                logSec.classList.add('hidden');
+                tabReg.className = 'py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all bg-emerald-600 text-white shadow-sm';
+                tabLog.className = 'py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all text-slate-600 hover:text-slate-900';
+            } else {
+                logSec.classList.remove('hidden');
+                regSec.classList.add('hidden');
+                tabLog.className = 'py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all bg-emerald-600 text-white shadow-sm';
+                tabReg.className = 'py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all text-slate-600 hover:text-slate-900';
+            }
+        }
+
+        // --- FLOW 1: REGISTER FOR FREE ---
+        async function handleRegisterEmailSubmit(e) {
+            e.preventDefault();
+            targetEmail = document.getElementById('register-email-input').value.trim().toLowerCase();
+
+            if (!targetEmail || !targetEmail.includes('@')) {
+                alert('Please enter a valid corporate email address.');
+                return;
+            }
+
+            const btn = document.getElementById('register-send-btn');
+            btn.innerText = 'Sending OTP...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/.netlify/functions/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail, isTrial: true })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to send OTP');
+
+                document.getElementById('register-displayed-email').innerText = targetEmail;
+                document.getElementById('register-email-form').classList.add('hidden');
+                document.getElementById('register-step-otp').classList.remove('hidden');
+
+                setTimeout(() => {
+                    const firstBox = document.querySelector('.reg-otp-box');
+                    if (firstBox) firstBox.focus();
+                }, 100);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                btn.innerText = 'Send Registration OTP';
+                btn.disabled = false;
+            }
+        }
+
+        async function verifyAndRegisterUser() {
+            let enteredOtp = '';
+            document.querySelectorAll('.reg-otp-box').forEach(b => { enteredOtp += b.value; });
+
+            if (enteredOtp.length < 6) {
+                alert('Please enter the complete 6-digit verification code.');
+                return;
+            }
+
+            try {
+                // Verify OTP
+                const verifyRes = await fetch('/.netlify/functions/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail, otp: enteredOtp })
+                });
+                const verifyData = await verifyRes.json();
+                if (!verifyRes.ok || !verifyData.success) throw new Error(verifyData.error || 'Invalid OTP code.');
+
+                // Insert/Initialize trial record in Supabase via check-trial function
+                const trialRes = await fetch('/.netlify/functions/check-trial', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail })
+                });
+                const trialData = await trialRes.json();
+                if (!trialRes.ok) throw new Error(trialData.error || 'Failed to register trial record.');
+
+                alert('Registration successful! Your 28-day free trial has started. You can now use "Use Free Trial" to log in.');
+                window.location.reload();
+            } catch (error) {
+                alert('Registration failed: ' + error.message);
+            }
+        }
+
+        // --- FLOW 2: USE FREE TRIAL LOGIN ---
+        async function handleLoginEmailSubmit(e) {
+            e.preventDefault();
+            targetEmail = document.getElementById('login-email-input').value.trim().toLowerCase();
+
+            if (!targetEmail || !targetEmail.includes('@')) {
+                alert('Please enter a valid corporate email address.');
+                return;
+            }
+
+            const btn = document.getElementById('login-send-btn');
+            btn.innerText = 'Sending OTP...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/.netlify/functions/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail, isTrial: true })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to send OTP');
+
+                document.getElementById('login-displayed-email').innerText = targetEmail;
+                document.getElementById('login-email-form').classList.add('hidden');
+                document.getElementById('login-step-otp').classList.remove('hidden');
+
+                setTimeout(() => {
+                    const firstBox = document.querySelector('.log-otp-box');
+                    if (firstBox) firstBox.focus();
+                }, 100);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                btn.innerText = 'Send Trial Login OTP';
+                btn.disabled = false;
+            }
+        }
+
+        async function verifyTrialLoginAndRoute() {
+            let enteredOtp = '';
+            document.querySelectorAll('.log-otp-box').forEach(b => { enteredOtp += b.value; });
+
+            if (enteredOtp.length < 6) {
+                alert('Please enter the complete 6-digit verification code.');
+                return;
+            }
+
+            try {
+                // Verify OTP
+                const verifyRes = await fetch('/.netlify/functions/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail, otp: enteredOtp })
+                });
+                const verifyData = await verifyRes.json();
+                if (!verifyRes.ok || !verifyData.success) throw new Error(verifyData.error || 'Invalid OTP code.');
+
+                // Check trial status & route via check-trial.js
+                const trialRes = await fetch('/.netlify/functions/check-trial', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail })
+                });
+                const trialData = await trialRes.json();
+                if (!trialRes.ok) throw new Error(trialData.error || 'Account evaluation failed.');
+
+                // Save session locally
+                const sessionRecord = {
+                    email: targetEmail,
+                    status: trialData.status,
+                    expiresAt: trialData.expiresAt || new Date(Date.now() + (28 * 24 * 60 * 60 * 1000)).toISOString()
+                };
+                localStorage.setItem('garcos_active_session', JSON.stringify(sessionRecord));
+
+                // Redirect based on backend response (app.html, trial-app.html, or paymentplan.html)
+                if (trialData.redirect) {
+                    window.location.href = trialData.redirect;
+                } else {
+                    window.location.href = 'trial-app.html';
+                }
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        }
+
+        // Setup OTP Box Navigation Helpers for both forms
+        function setupOtpInputs(selectorClass) {
+            const boxes = document.querySelectorAll('.' + selectorClass);
+            boxes.forEach((box, index) => {
+                box.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    if (val && !isNaN(val)) {
+                        e.target.value = val;
+                        if (index < boxes.length - 1) boxes[index + 1].focus();
+                    } else {
+                        e.target.value = '';
+                    }
+                });
+                box.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace') {
+                        if (box.value === '' && index > 0) {
+                            boxes[index - 1].focus();
+                            boxes[index - 1].value = '';
+                        } else {
+                            box.value = '';
+                        }
+                    }
+                });
+            });
+        }
+
+        setupOtpInputs('reg-otp-box');
+        setupOtpInputs('log-otp-box');
+    </script>
+</body>
+
+</html>
